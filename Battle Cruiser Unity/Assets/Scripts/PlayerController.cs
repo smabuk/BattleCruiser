@@ -3,8 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using FishNet.Object;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : NetworkBehaviour
 {
     private Inputs _inputs;
 
@@ -13,6 +14,14 @@ public class PlayerController : MonoBehaviour
     [field: SerializeField]
     public Vector2 Velocity { get; private set; }
 
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+        if (!base.IsOwner)
+        {
+            this.enabled = false;
+        }
+    }
 
     void Awake()
     {
@@ -44,6 +53,17 @@ public class PlayerController : MonoBehaviour
 
     // Update is called once per frame
     void Update()
+    {
+        Move();
+    }
+
+    [ServerRpc]
+    void ServerMove()
+    {
+        Move();
+    }
+
+    void Move()
     {
         Vector2 position = transform.position;
         position += Velocity * Speed * Time.deltaTime;
