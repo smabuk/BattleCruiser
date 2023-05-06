@@ -1,80 +1,137 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Collections.Concurrent;
+using MQTTnet;
+using MQTTnet.Client;
+
 namespace CaptainCoder.BattleCruiser.Client;
 
 public class ClientConnection
 {
+    private ConcurrentQueue<string> _messages = new ();
+    private MqttFactory _mqttFactory = new ();
+    public ClientConnection(string host, int port) => (Host, Port) = (host, port);
 
-    public static async Task Run()
+    public string Host { get; }
+    public int Port { get; }
+    public bool IsConnected { get; private set; } = false;
+
+    public event Action OnConnected;
+    public event Action OnDisconnected;
+    public event Action OnConnecting;
+    public event Action<IServerMessage> OnMessageReceived;
+    
+
+    public async Task Connect()
     {
+        /*
+         * This sample creates a simple MQTT client and connects to a public broker.
+         *
+         * Always dispose the client when it is no longer used.
+         * The default version of MQTT is 3.1.1.
+         */
+        
 
-        // 127.0.0.1 == localhost
-        // 0.0.0.0
-        IPHostEntry ipHostInfo = await Dns.GetHostEntryAsync("localhost");
-        IPAddress ipAddress = ipHostInfo.AddressList[0];
-        IPEndPoint ipEndPoint = new(ipAddress, 12345);
+        using var mqttClient = _mqttFactory.CreateMqttClient();
+        
+        // Use builder classes where possible in this project.
+        var mqttClientOptions = new MqttClientOptionsBuilder().WithTcpServer(Host, Port).Build();
+        mqttClient.ConnectedAsync += ForwardConnectedAsync;
+        mqttClient.DisconnectedAsync += ForwardDisconnectedAsync;
+        mqttClient.ConnectingAsync += ForwardConnectingAsync;
+        mqttClient.ApplicationMessageReceivedAsync += ForwardMessageReceivedAsync;
 
-        using Socket client = new(
-            ipEndPoint.AddressFamily,
-            SocketType.Stream,
-            ProtocolType.Tcp);
+        // This will throw an exception if the server is not available.
+        // The result from this message returns additional data which was sent 
+        // from the server. Please refer to the MQTT protocol specification for details.
+        
+        var response = await mqttClient.ConnectAsync(mqttClientOptions, CancellationToken.None);
 
-        await client.ConnectAsync(ipEndPoint);
+        Console.WriteLine("The MQTT client is connected.");
 
-        _ = ListenToServer();
+        var mqttSubscribeOptions = _mqttFactory.CreateSubscribeOptionsBuilder()
+                .WithTopicFilter(
+                    f =>
+                    {
+                        f.WithTopic("chat");
+                    })
+                .Build();
 
-        await HandleUserInput();
+        await mqttClient.SubscribeAsync(mqttSubscribeOptions, CancellationToken.None);
+        
 
-        async Task HandleUserInput()
+        while (true)
         {
-            while (true)
+            string action = await NextAction();
+            if (action == "END")
             {
-                string userInput = Console.ReadLine()!;
-                byte[] messageBytes;
-
-                if (userInput == "END")
-                {
-                    messageBytes = Encoding.UTF8.GetBytes("<|EOM|>");
-                    _ = await client.SendAsync(messageBytes, SocketFlags.None);
-                    break;
-                }
-
-                messageBytes = Encoding.UTF8.GetBytes(userInput);
-                _ = await client.SendAsync(messageBytes, SocketFlags.None);
+                break;
             }
-            client.Shutdown(SocketShutdown.Both);
+            await SendStringMessage(action, mqttClient);
         }
+        // response.DumpToConsole();
 
-        async Task ListenToServer()
+        // Send a clean disconnect to the server by calling _DisconnectAsync_. Without this the TCP connection
+        // gets dropped and the server will handle this as a non clean disconnect (see MQTT spec for details).
+        var mqttClientDisconnectOptions = _mqttFactory.CreateClientDisconnectOptionsBuilder().Build();
+        await mqttClient.DisconnectAsync(mqttClientDisconnectOptions, CancellationToken.None);
+        
+    }
+
+    private Task ForwardDisconnectedAsync(MqttClientDisconnectedEventArgs args)
+    {
+        IsConnected = false;
+        return Task.Run(() => OnDisconnected?.Invoke());
+    }
+
+    public async Task<string> NextAction()
+    {
+        string action = null!;
+        Console.WriteLine("Waiting for next action");
+        while(!_messages.TryDequeue(out action))
         {
-            while (true)
-            {
-                // Send message.
-
-                // var message = "Hi friends 👋!<|EOM|>";
-                // var messageBytes = Encoding.UTF8.GetBytes(message);
-                // _ = await client.SendAsync(messageBytes, SocketFlags.None);
-                // Console.WriteLine($"Socket client sent message: \"{message}\"");
-
-                // Receive ack.
-                var buffer = new byte[1_024];
-                var received = await client.ReceiveAsync(buffer, SocketFlags.None);
-                var incommingMessage = Encoding.UTF8.GetString(buffer, 0, received);
-                Console.WriteLine($"Message from Server: \"{incommingMessage}\"");
-                // if (response == "<|ACK|>")
-                // {
-                //     Console.WriteLine(
-                //         $"Socket client received acknowledgment: \"{response}\"");
-                // break;
-                // }
-                // Sample output:
-                //     Socket client sent message: "Hi friends 👋!<|EOM|>"
-                //     Socket client received acknowledgment: "<|ACK|>"
-            }
-
+            await Task.Delay(1000);
         }
+        Console.WriteLine($"Next Action was: {action}");
+        return action;
 
+    }
+
+    public void EnqueueMessage(string message)
+    {
+        Console.WriteLine($"Enqueuing: {message}");
+        _messages.Enqueue(message);
+    }
+
+
+    private Task ForwardMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs args)
+    {
+        // Task.Run(() => MessageReceived.Invoke(args))
+        return Task.Run(() =>
+        {
+            ServerMessage message = new (args.ApplicationMessage);
+            OnMessageReceived?.Invoke(message);
+        });
+    } 
+
+    private Task ForwardConnectingAsync(MqttClientConnectingEventArgs args)  => Task.Run(() => OnConnecting?.Invoke());
+        // if (ConnectingAsync == null) { return null } else { return ConnectingAsync.Invoke(args); }
+        
+    private Task ForwardConnectedAsync(MqttClientConnectedEventArgs args)
+    {
+        IsConnected = true;     
+        _ = Task.Run(() => OnConnected?.Invoke());
+        return Task.CompletedTask;
+    } 
+    
+    private async Task SendStringMessage(string toSend, IMqttClient  client)
+    {
+        MqttApplicationMessage message = new MqttApplicationMessageBuilder()
+                .WithTopic("chat")
+                .WithPayload(toSend)
+                .Build();
+        await client.PublishAsync(message);
     }
 
 }
