@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CaptainCoder.BattleCruiser.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CaptainCoder.BattleCruiser.Server", "CaptainCoder.BattleCruiser.Server\CaptainCoder.BattleCruiser.Server.csproj", "{82CB08E1-7781-4323-A63D-7F837ED81393}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CaptainCoder.BattleCruiser.ConsoleClient", "CaptainCoder.BattleCruiser.ConsoleClient\CaptainCoder.BattleCruiser.ConsoleClient.csproj", "{D6538808-551C-49D7-9A03-39CB9AB9884B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{82CB08E1-7781-4323-A63D-7F837ED81393}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{82CB08E1-7781-4323-A63D-7F837ED81393}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{82CB08E1-7781-4323-A63D-7F837ED81393}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D6538808-551C-49D7-9A03-39CB9AB9884B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6538808-551C-49D7-9A03-39CB9AB9884B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6538808-551C-49D7-9A03-39CB9AB9884B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6538808-551C-49D7-9A03-39CB9AB9884B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
