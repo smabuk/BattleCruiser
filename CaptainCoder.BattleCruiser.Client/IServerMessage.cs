@@ -3,21 +3,9 @@ namespace CaptainCoder.BattleCruiser.Client;
 using MQTTnet;
 using MQTTnet.Client;
 
-public interface IServerMessage
-{
-    public string PayloadString { get; }
-}
+public interface IServerMessage {}
 
-public class ServerMessage : IServerMessage
-{
-    public MqttApplicationMessage Message { get; }
+public record class GridConfigMessage(GridConfig Config) : IServerMessage;
 
-    public ServerMessage(MqttApplicationMessage message)
-    {
-        Message = message;
-        PayloadString = Message.ConvertPayloadToString();
-    }
-
-    public string PayloadString {get; }
-}
+// MqttApplicationMessage -- This is what gets sent
 

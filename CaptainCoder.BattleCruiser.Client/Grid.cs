@@ -4,16 +4,9 @@ using System.Text.Json;
 
 public record GridConfig(int Rows, int Cols, ShipConfig[] Ships)
 {
-    public string ToJson()
-    {
-        // TODO: Investigate encoding schema
-        return JsonSerializer.Serialize(this);
-    }
-
-    public static GridConfig? FromJson(string json) // "null"
-    {
-        return JsonSerializer.Deserialize<GridConfig>(json);
-    }
+    // TODO: Investigate encoding schema
+    public string ToJson() => JsonSerializer.Serialize(this);
+    public static GridConfig? FromJson(string json) => JsonSerializer.Deserialize<GridConfig>(json);
 }
 
 public record struct ShipConfig(Position Position, ShipType ShipType, Orientation Orientation);

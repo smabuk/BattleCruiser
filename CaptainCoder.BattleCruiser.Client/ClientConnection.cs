@@ -110,8 +110,8 @@ public class ClientConnection
         // Task.Run(() => MessageReceived.Invoke(args))
         return Task.Run(() =>
         {
-            ServerMessage message = new (args.ApplicationMessage);
-            OnMessageReceived?.Invoke(message);
+            // ServerMessage message = new (args.ApplicationMessage);
+            // OnMessageReceived?.Invoke(message);
         });
     } 
 

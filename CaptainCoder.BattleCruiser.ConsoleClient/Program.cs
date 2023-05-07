@@ -1,4 +1,7 @@
 ﻿using CaptainCoder.BattleCruiser;
+using CaptainCoder.BattleCruiser.Client;
+
+
 
 ShipConfig[] ships = new ShipConfig[]
         {
@@ -8,7 +11,23 @@ ShipConfig[] ships = new ShipConfig[]
         };
 GridConfig config = new(7, 7, ships);
 
-Console.WriteLine(config.ToJson());
+// Console.WriteLine(config.ToJson());
+
+IServerMessage message = new GridConfigMessage(config);
+string json = JsonUtility.Serialize(message);
+Console.WriteLine(json);
+
+IServerMessage result = JsonUtility.Deserialize<IServerMessage>(json);
+Console.WriteLine(result);
+
+GridConfigMessage gridConfigMessage = result as GridConfigMessage;
+Console.WriteLine(string.Join(", ", gridConfigMessage.Config.Ships));
+// HandleMessage(result);
+
+// void HandleMessage(IServerMessage toHandle)
+{
+    // Use factor or whatever to decode appropriately
+}
 
 
 // ClientConnection connection = new("localhost", 12345);
