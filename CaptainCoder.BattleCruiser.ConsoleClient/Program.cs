@@ -1,50 +1,61 @@
-﻿using CaptainCoder.BattleCruiser.Client;
+﻿using CaptainCoder.BattleCruiser;
 
-ClientConnection connection = new("localhost", 12345);
+ShipConfig[] ships = new ShipConfig[]
+        {
+            new ShipConfig((0, 0), ShipType.Battleship, Orientation.EastWest),
+            new ShipConfig((1, 0), ShipType.Destroyer, Orientation.NorthSouth),
+            new ShipConfig((2, 1), ShipType.Submarine, Orientation.EastWest),
+        };
+GridConfig config = new(7, 7, ships);
 
-connection.OnMessageReceived += MessageReceived;
-connection.OnConnected += Connected;
-connection.OnDisconnected += Disconnect;
-connection.OnConnecting += Connecting;
+Console.WriteLine(config.ToJson());
 
-_ = connection.Connect();
 
-bool running = true;
-while (running)
-{
-    await Task.Delay(100);
-}
+// ClientConnection connection = new("localhost", 12345);
 
-void MessageReceived(IServerMessage message)
-{
-    Console.WriteLine($"MESSAGE: {message.PayloadString}");
-}
+// connection.OnMessageReceived += MessageReceived;
+// connection.OnConnected += Connected;
+// connection.OnDisconnected += Disconnect;
+// connection.OnConnecting += Connecting;
 
-void Disconnect()
-{
-    Console.WriteLine("Disconnected.");
-    running = false;
-}
+// _ = connection.Connect();
 
-void Connected()
-{
-    Console.WriteLine("Connected!");
-    HandleUserInput();
-}
+// bool running = true;
+// while (running)
+// {
+//     await Task.Delay(100);
+// }
 
-void Connecting()
-{
-    Console.WriteLine("Connecting...");
-}
+// void MessageReceived(IServerMessage message)
+// {
+//     Console.WriteLine($"MESSAGE: {message.PayloadString}");
+// }
 
-void HandleUserInput()
-{
-    Console.WriteLine("HERE?");
-    Console.WriteLine($"IsConnected: {connection.IsConnected}");
-    while (connection.IsConnected)
-    {
-        Console.Write(" > ");
-        string input = Console.ReadLine()!;
-        connection.EnqueueMessage(input);
-    }
-}
+// void Disconnect()
+// {
+//     Console.WriteLine("Disconnected.");
+//     running = false;
+// }
+
+// void Connected()
+// {
+//     Console.WriteLine("Connected!");
+//     HandleUserInput();
+// }
+
+// void Connecting()
+// {
+//     Console.WriteLine("Connecting...");
+// }
+
+// void HandleUserInput()
+// {
+//     Console.WriteLine("HERE?");
+//     Console.WriteLine($"IsConnected: {connection.IsConnected}");
+//     while (connection.IsConnected)
+//     {
+//         Console.Write(" > ");
+//         string input = Console.ReadLine()!;
+//         connection.EnqueueMessage(input);
+//     }
+// }

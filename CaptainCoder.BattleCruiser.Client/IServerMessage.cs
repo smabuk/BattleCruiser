@@ -19,5 +19,5 @@ public class ServerMessage : IServerMessage
     }
 
     public string PayloadString {get; }
-
 }
+
