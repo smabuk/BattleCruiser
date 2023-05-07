@@ -20,7 +20,7 @@ public class ClientConnection
     public event Action OnConnected;
     public event Action OnDisconnected;
     public event Action OnConnecting;
-    public event Action<IServerMessage> OnMessageReceived;
+    public event Action<INetworkMessage> OnMessageReceived;
     
 
     public async Task Connect()
