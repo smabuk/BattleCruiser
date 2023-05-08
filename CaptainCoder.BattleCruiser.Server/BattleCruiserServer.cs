@@ -40,10 +40,11 @@ public class BattleCruiserServer
         }
     }
 
-    private async Task OnClientConnect(ClientConnectedEventArgs args)
+    private Task OnClientConnect(ClientConnectedEventArgs args)
     {
         Console.ForegroundColor = ConsoleColor.DarkRed;
         Console.WriteLine("CLIENT CONNECTED");
         Console.ResetColor();
+        return Task.CompletedTask;
     }
 }

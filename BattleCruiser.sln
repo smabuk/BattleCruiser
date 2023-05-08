@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CaptainCoder.BattleCruiser.Client", "CaptainCoder.BattleCruiser.Client\CaptainCoder.BattleCruiser.Client.csproj", "{9BC1A998-C1EC-4914-968B-AAE41AB3445E}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CaptainCoder.BattleCruiser.Server", "CaptainCoder.BattleCruiser.Server\CaptainCoder.BattleCruiser.Server.csproj", "{82CB08E1-7781-4323-A63D-7F837ED81393}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CaptainCoder.BattleCruiser.ConsoleClient", "CaptainCoder.BattleCruiser.ConsoleClient\CaptainCoder.BattleCruiser.ConsoleClient.csproj", "{D6538808-551C-49D7-9A03-39CB9AB9884B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CaptainCoder.BattleCruiser.Tests", "CaptainCoder.BattleCruiser.Tests\CaptainCoder.BattleCruiser.Tests.csproj", "{63014D91-F6E1-4196-A2B1-D85031D6681C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CaptainCoder.BattleCruiser", "CaptainCoder.BattleCruiser\CaptainCoder.BattleCruiser.csproj", "{143FADFF-6D13-4796-9576-6FA1FE62D4A9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,10 +20,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{9BC1A998-C1EC-4914-968B-AAE41AB3445E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9BC1A998-C1EC-4914-968B-AAE41AB3445E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9BC1A998-C1EC-4914-968B-AAE41AB3445E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9BC1A998-C1EC-4914-968B-AAE41AB3445E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{82CB08E1-7781-4323-A63D-7F837ED81393}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{82CB08E1-7781-4323-A63D-7F837ED81393}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{82CB08E1-7781-4323-A63D-7F837ED81393}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -36,5 +32,9 @@ Global
 		{63014D91-F6E1-4196-A2B1-D85031D6681C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{63014D91-F6E1-4196-A2B1-D85031D6681C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{63014D91-F6E1-4196-A2B1-D85031D6681C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{143FADFF-6D13-4796-9576-6FA1FE62D4A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{143FADFF-6D13-4796-9576-6FA1FE62D4A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{143FADFF-6D13-4796-9576-6FA1FE62D4A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{143FADFF-6D13-4796-9576-6FA1FE62D4A9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -1,8 +1,5 @@
 using CaptainCoder.Core;
-using MQTTnet;
-using MQTTnet.Client;
-namespace CaptainCoder.BattleCruiser.Client;
-
+namespace CaptainCoder.BattleCruiser;
 
 public interface INetworkMessage {};
 
@@ -62,4 +59,3 @@ public record class GameResult(int TotalRounds, string[] WinnerIds) : INetworkMe
 
 // public record class 
 // MqttApplicationMessage -- This is what gets sent
-

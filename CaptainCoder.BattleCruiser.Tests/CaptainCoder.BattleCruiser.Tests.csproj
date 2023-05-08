@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CaptainCoder.BattleCruiser.Client\CaptainCoder.BattleCruiser.Client.csproj" />
+    <ProjectReference Include="..\CaptainCoder.BattleCruiser\CaptainCoder.BattleCruiser.csproj" />
   </ItemGroup>
 
 </Project>
