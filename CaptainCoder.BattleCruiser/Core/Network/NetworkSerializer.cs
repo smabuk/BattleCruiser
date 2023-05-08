@@ -1,18 +1,21 @@
+using System.Text;
 using System.Text.Json;
 
 internal record JsonWrapper(string ClassName, string Json);
 
-public static class JsonUtility
+public static class NetworkSerializer
 {
-    public static string Serialize(object toSerialize)
+    public static byte[] Serialize(object toSerialize)
     {
         string json = JsonSerializer.Serialize(toSerialize);
         JsonWrapper wrapped = new (toSerialize.GetType().ToString(), json);
-        return JsonSerializer.Serialize(wrapped);
+        string serializedJson = JsonSerializer.Serialize(wrapped);
+        return Encoding.UTF8.GetBytes(serializedJson);
     }
 
-    public static T Deserialize<T>(string json)
+    public static T Deserialize<T>(byte[] data)
     {
+        string json = Encoding.UTF8.GetString(data);
         JsonWrapper wrapper = JsonSerializer.Deserialize<JsonWrapper>(json) ?? throw new NotSupportedException("Deserialized null object");
         Type wrappedType = Type.GetType(wrapper.ClassName);
         object deserialized = JsonSerializer.Deserialize(wrapper.Json, wrappedType) ?? throw new NotSupportedException("Deserialized null object");

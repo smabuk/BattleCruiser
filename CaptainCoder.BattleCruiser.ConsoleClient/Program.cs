@@ -14,10 +14,10 @@ GridConfig config = new(7, 7, ships);
 // Console.WriteLine(config.ToJson());
 
 INetworkMessage message = new GridConfigMessage(config);
-string json = JsonUtility.Serialize(message);
-Console.WriteLine(json);
+byte[] data = NetworkSerializer.Serialize(message);
+Console.WriteLine(string.Join(", ", data));
 
-INetworkMessage result = JsonUtility.Deserialize<INetworkMessage>(json);
+INetworkMessage result = NetworkSerializer.Deserialize<INetworkMessage>(data);
 Console.WriteLine(result);
 
 GridConfigMessage gridConfigMessage = result as GridConfigMessage;
