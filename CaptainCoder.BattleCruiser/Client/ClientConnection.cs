@@ -9,74 +9,72 @@ namespace CaptainCoder.BattleCruiser.Client;
 
 public class ClientConnection
 {
-    private ConcurrentQueue<string> _messages = new ();
-    private MqttFactory _mqttFactory = new ();
+    private bool _requestDisconnect = false;
+    private ConcurrentQueue<INetworkMessage> _outbox = new();
+    private ConcurrentQueue<INetworkMessage> _inbox = new();
+    private MqttFactory _mqttFactory = new();
     public ClientConnection(string host, int port) => (Host, Port) = (host, port);
-
     public string Host { get; }
     public int Port { get; }
     public bool IsConnected { get; private set; } = false;
-
     public event Action OnConnected;
     public event Action OnDisconnected;
     public event Action OnConnecting;
     public event Action<INetworkMessage> OnMessageReceived;
-    
 
-    public async Task Connect()
+    public async Task ConnectAndProcessMessages()
     {
-        /*
-         * This sample creates a simple MQTT client and connects to a public broker.
-         *
-         * Always dispose the client when it is no longer used.
-         * The default version of MQTT is 3.1.1.
-         */
-        
-
         using var mqttClient = _mqttFactory.CreateMqttClient();
-        
-        // Use builder classes where possible in this project.
+        ConnectEvents(mqttClient);
         var mqttClientOptions = new MqttClientOptionsBuilder().WithTcpServer(Host, Port).Build();
-        mqttClient.ConnectedAsync += ForwardConnectedAsync;
-        mqttClient.DisconnectedAsync += ForwardDisconnectedAsync;
-        mqttClient.ConnectingAsync += ForwardConnectingAsync;
-        mqttClient.ApplicationMessageReceivedAsync += ForwardMessageReceivedAsync;
-
-        // This will throw an exception if the server is not available.
-        // The result from this message returns additional data which was sent 
-        // from the server. Please refer to the MQTT protocol specification for details.
-        
         var response = await mqttClient.ConnectAsync(mqttClientOptions, CancellationToken.None);
-
         Console.WriteLine("The MQTT client is connected.");
+        await SubscribeToTopic("private/clientId", mqttClient);
+        await SubscribeToTopic("public/server", mqttClient);
+        // TODO: FISHY SMELL (stinky code) -- connect shouldn't also disconnect?
+        await ProcessMessages(mqttClient);
 
-        var mqttSubscribeOptions = _mqttFactory.CreateSubscribeOptionsBuilder()
+        var mqttClientDisconnectOptions = _mqttFactory.CreateClientDisconnectOptionsBuilder().Build();
+        await mqttClient.DisconnectAsync(mqttClientDisconnectOptions, CancellationToken.None);
+    }
+
+    private async Task ProcessMessages(IMqttClient client)
+    {
+        while (true)
+        {
+            IResult<INetworkMessage> action = await DequeueOutbox();
+            if (action is Disconnect<INetworkMessage>) { break; }
+            if (action is Message<INetworkMessage> success)
+            {
+                await SendMessage(success.Value, client);
+            }
+            else
+            {
+                throw new InvalidCastException($"Could not cast {action} to message.");
+            }
+        }
+    }
+
+    private void ConnectEvents(IMqttClient client)
+    {
+        client.ConnectedAsync += ForwardConnectedAsync;
+        client.DisconnectedAsync += ForwardDisconnectedAsync;
+        client.ConnectingAsync += ForwardConnectingAsync;
+        client.ApplicationMessageReceivedAsync += ForwardMessageReceivedAsync;
+    }
+
+    public void RequestDisconnect() => _requestDisconnect = true;
+
+    private async Task SubscribeToTopic(string topic, IMqttClient client)
+    {
+        var subscribeInfo = _mqttFactory.CreateSubscribeOptionsBuilder()
                 .WithTopicFilter(
                     f =>
                     {
-                        f.WithTopic("chat");
+                        f.WithTopic(topic);
                     })
                 .Build();
-
-        await mqttClient.SubscribeAsync(mqttSubscribeOptions, CancellationToken.None);
-        
-
-        while (true)
-        {
-            string action = await NextAction();
-            if (action == "END")
-            {
-                break;
-            }
-            await SendStringMessage(action, mqttClient);
-        }
-        // response.DumpToConsole();
-
-        // Send a clean disconnect to the server by calling _DisconnectAsync_. Without this the TCP connection
-        // gets dropped and the server will handle this as a non clean disconnect (see MQTT spec for details).
-        var mqttClientDisconnectOptions = _mqttFactory.CreateClientDisconnectOptionsBuilder().Build();
-        await mqttClient.DisconnectAsync(mqttClientDisconnectOptions, CancellationToken.None);
-        
+        await client.SubscribeAsync(subscribeInfo, CancellationToken.None);
     }
 
     private Task ForwardDisconnectedAsync(MqttClientDisconnectedEventArgs args)
@@ -85,51 +83,56 @@ public class ClientConnection
         return Task.Run(() => OnDisconnected?.Invoke());
     }
 
-    public async Task<string> NextAction()
+    public async Task<IResult<INetworkMessage>> DequeueOutbox()
     {
-        string action = null!;
+        INetworkMessage? action = null;
         Console.WriteLine("Waiting for next action");
-        while(!_messages.TryDequeue(out action))
+        while (!_outbox.TryDequeue(out action))
         {
-            await Task.Delay(1000);
+            // TODO: Examine ManualResetEvent instead: 
+            // https://learn.microsoft.com/en-us/dotnet/api/system.threading.manualresetevent?view=netstandard-2.1
+            await Task.Delay(100);
+            if (_requestDisconnect)
+            {
+                return new Disconnect<INetworkMessage>();
+            }
         }
         Console.WriteLine($"Next Action was: {action}");
-        return action;
-
+        return new Message<INetworkMessage>(action);
     }
 
-    public void EnqueueMessage(string message)
+    public void EnqueueMessage(INetworkMessage toSend)
     {
-        Console.WriteLine($"Enqueuing: {message}");
-        _messages.Enqueue(message);
+        Console.WriteLine($"Enqueuing: {toSend}");
+        _outbox.Enqueue(toSend);
     }
-
 
     private Task ForwardMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs args)
     {
-        // Task.Run(() => MessageReceived.Invoke(args))
         return Task.Run(() =>
         {
-            // ServerMessage message = new (args.ApplicationMessage);
-            // OnMessageReceived?.Invoke(message);
+            byte[] payload = args.ApplicationMessage.PayloadSegment.ToArray();
+            INetworkMessage incommingMessage = NetworkSerializer.Deserialize<INetworkMessage>(payload);
+            _inbox.Enqueue(incommingMessage);
         });
-    } 
+    }
 
-    private Task ForwardConnectingAsync(MqttClientConnectingEventArgs args)  => Task.Run(() => OnConnecting?.Invoke());
-        // if (ConnectingAsync == null) { return null } else { return ConnectingAsync.Invoke(args); }
-        
+    private Task ForwardConnectingAsync(MqttClientConnectingEventArgs args) => Task.Run(() => OnConnecting?.Invoke());
+    // if (ConnectingAsync == null) { return null } else { return ConnectingAsync.Invoke(args); }
+
     private Task ForwardConnectedAsync(MqttClientConnectedEventArgs args)
     {
-        IsConnected = true;     
+        IsConnected = true;
         _ = Task.Run(() => OnConnected?.Invoke());
         return Task.CompletedTask;
-    } 
-    
-    private async Task SendStringMessage(string toSend, IMqttClient  client)
+    }
+
+    private async Task SendMessage(INetworkMessage toSend, IMqttClient client)
     {
+        byte[] payload = NetworkSerializer.Serialize(toSend);
         MqttApplicationMessage message = new MqttApplicationMessageBuilder()
-                .WithTopic("chat")
-                .WithPayload(toSend)
+                .WithTopic("private/server")
+                .WithPayload(payload)
                 .Build();
         await client.PublishAsync(message);
     }

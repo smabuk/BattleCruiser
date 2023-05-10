@@ -1,8 +1,6 @@
 ﻿using CaptainCoder.BattleCruiser;
 using CaptainCoder.BattleCruiser.Client;
 
-
-
 ShipConfig[] ships = new ShipConfig[]
         {
             new ShipConfig((0, 0), ShipType.Battleship, Orientation.EastWest),
@@ -11,70 +9,24 @@ ShipConfig[] ships = new ShipConfig[]
         };
 GridConfig config = new(7, 7, ships);
 
-// Console.WriteLine(config.ToJson());
+INetworkMessage gridConfigMessage = new GridConfigMessage(config);
 
-INetworkMessage message = new GridConfigMessage(config);
-byte[] data = NetworkSerializer.Serialize(message);
-Console.WriteLine(string.Join(", ", data));
+ClientConnection connection = new ("localhost", 12345);
 
-INetworkMessage result = NetworkSerializer.Deserialize<INetworkMessage>(data);
-Console.WriteLine(result);
+connection.OnConnected += SendMessageTest;
+connection.OnConnecting += () => Console.WriteLine("Connecting...");
+connection.OnDisconnected += () => Console.WriteLine("Disconnected!");
+connection.OnMessageReceived += OnMessageReceived;
 
-GridConfigMessage gridConfigMessage = result as GridConfigMessage;
-Console.WriteLine(string.Join(", ", gridConfigMessage.Config.Ships));
-// HandleMessage(result);
+await connection.ConnectAndProcessMessages();
 
-// void HandleMessage(IServerMessage toHandle)
+void SendMessageTest()
 {
-    // Use factor or whatever to decode appropriately
+    Console.WriteLine("Connected!");
+    connection.EnqueueMessage(gridConfigMessage);
 }
 
-
-// ClientConnection connection = new("localhost", 12345);
-
-// connection.OnMessageReceived += MessageReceived;
-// connection.OnConnected += Connected;
-// connection.OnDisconnected += Disconnect;
-// connection.OnConnecting += Connecting;
-
-// _ = connection.Connect();
-
-// bool running = true;
-// while (running)
-// {
-//     await Task.Delay(100);
-// }
-
-// void MessageReceived(IServerMessage message)
-// {
-//     Console.WriteLine($"MESSAGE: {message.PayloadString}");
-// }
-
-// void Disconnect()
-// {
-//     Console.WriteLine("Disconnected.");
-//     running = false;
-// }
-
-// void Connected()
-// {
-//     Console.WriteLine("Connected!");
-//     HandleUserInput();
-// }
-
-// void Connecting()
-// {
-//     Console.WriteLine("Connecting...");
-// }
-
-// void HandleUserInput()
-// {
-//     Console.WriteLine("HERE?");
-//     Console.WriteLine($"IsConnected: {connection.IsConnected}");
-//     while (connection.IsConnected)
-//     {
-//         Console.Write(" > ");
-//         string input = Console.ReadLine()!;
-//         connection.EnqueueMessage(input);
-//     }
-// }
+void OnMessageReceived(INetworkMessage message)
+{
+    Console.WriteLine(message);
+}
