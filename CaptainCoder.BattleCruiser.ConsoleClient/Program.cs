@@ -11,22 +11,14 @@ GridConfig config = new(7, 7, ships);
 
 INetworkMessage gridConfigMessage = new GridConfigMessage(config);
 
-ClientConnection connection = new ("localhost", 12345);
+PlayerClient playerClient = new ("localhost", 12345);
 
-connection.OnConnected += SendMessageTest;
-connection.OnConnecting += () => Console.WriteLine("Connecting...");
-connection.OnDisconnected += () => Console.WriteLine("Disconnected!");
-connection.OnMessageReceived += OnMessageReceived;
+playerClient.OnConnected += SendMessageTest;
 
-await connection.ConnectAndProcessMessages();
+await playerClient.Connect();
 
 void SendMessageTest()
 {
     Console.WriteLine("Connected!");
-    connection.EnqueueMessage(gridConfigMessage);
-}
-
-void OnMessageReceived(INetworkMessage message)
-{
-    Console.WriteLine(message);
+    playerClient.EnqueueMessage(gridConfigMessage, "private/hostId");
 }

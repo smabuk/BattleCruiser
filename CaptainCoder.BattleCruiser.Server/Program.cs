@@ -1,6 +1,6 @@
 ﻿using CaptainCoder.BattleCruiser.Server;
 
-BattleCruiserServer server = new(12345, true);
+BattleCruiserMessageBroker server = new(12345, true);
 
 await server.Start();
 

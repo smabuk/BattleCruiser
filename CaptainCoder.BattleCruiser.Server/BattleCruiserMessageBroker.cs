@@ -3,9 +3,9 @@ using MQTTnet.Server;
 
 namespace CaptainCoder.BattleCruiser.Server;
 
-public class BattleCruiserServer
+public class BattleCruiserMessageBroker
 {
-    public BattleCruiserServer(int port, bool logging = false) => (Port, Logging) = (port, logging);
+    public BattleCruiserMessageBroker(int port, bool logging = false) => (Port, Logging) = (port, logging);
     public int Port { get; }
     public bool Logging { get; }
 
