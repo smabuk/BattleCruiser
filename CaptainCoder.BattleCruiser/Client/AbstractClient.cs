@@ -4,13 +4,12 @@ using MQTTnet.Client;
 
 namespace CaptainCoder.BattleCruiser.Client;
 
-internal record OutboxMessage(INetworkMessage Message, string Topic);
+internal record OutboxMessage(INetworkPayload Message, string Topic);
 public abstract class AbstractClient : IClient
 {
     private bool _requestDisconnect = false;
     private MqttFactory _mqttFactory = new();
     private ConcurrentQueue<OutboxMessage> _outbox = new();
-    private ConcurrentQueue<INetworkMessage> _inbox = new();
 
     public AbstractClient(string host, int port) => (Host, Port) = (host, port);
     public string Host { get; }
@@ -19,7 +18,7 @@ public abstract class AbstractClient : IClient
     public event Action OnConnected;
     public event Action OnDisconnected;
     public event Action OnConnecting;
-    public event Action<INetworkMessage> OnMessageReceived;
+    public event Action<NetworkMessage> OnMessageReceived;
 
     public async Task Connect()
     {
@@ -75,7 +74,7 @@ public abstract class AbstractClient : IClient
         }
     }
 
-    public void EnqueueMessage(INetworkMessage toSend, string topic)
+    public void EnqueueMessage(INetworkPayload toSend, string topic)
     {
         Console.WriteLine($"Enqueuing: {toSend}");
         _outbox.Enqueue(new OutboxMessage(toSend, topic));
@@ -104,9 +103,10 @@ public abstract class AbstractClient : IClient
     {
         return Task.Run(() =>
         {
-            byte[] payload = args.ApplicationMessage.PayloadSegment.ToArray();
-            INetworkMessage incommingMessage = NetworkSerializer.Deserialize<INetworkMessage>(payload);
-            _inbox.Enqueue(incommingMessage);
+            MqttApplicationMessage message =  args.ApplicationMessage;
+            byte[] payload = message.PayloadSegment.ToArray();
+            INetworkPayload networkPayload = NetworkSerializer.Deserialize<INetworkPayload>(payload);
+            OnMessageReceived?.Invoke(new NetworkMessage(args.ClientId, networkPayload));
         });
     }
 

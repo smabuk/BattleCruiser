@@ -22,8 +22,9 @@ public class PlayerClient : AbstractClient
         await SubscribeToTopic("private/clientId", client);
         await SubscribeToTopic("public/hostId", client);
     }
-    void PrintNetworkMessage(INetworkMessage message)
+    void PrintNetworkMessage(NetworkMessage message)
     {
-        Console.WriteLine(message);
+        Console.WriteLine($"Received Message From: {message.ClientId}");
+        Console.WriteLine($"Message was: {message.Payload}");
     }
 }

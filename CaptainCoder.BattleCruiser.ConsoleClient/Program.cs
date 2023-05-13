@@ -9,7 +9,7 @@ ShipConfig[] ships = new ShipConfig[]
         };
 GridConfig config = new(7, 7, ships);
 
-INetworkMessage gridConfigMessage = new GridConfigMessage(config);
+INetworkPayload gridConfigMessage = new GridConfigMessage(config);
 
 PlayerClient playerClient = new ("localhost", 12345);
 

@@ -23,9 +23,11 @@ public class GameHostClient : AbstractClient
         await SubscribeToTopic("private/hostId", client);
     }
 
-    private void ProcessReceivedMessages(INetworkMessage message)
+    private void ProcessReceivedMessages(NetworkMessage message)
     {
-        Console.WriteLine("Received Message");
-        EnqueueMessage(message, "public/hostId");
+        Console.WriteLine($"Received message from {message.ClientId}");
+        Console.WriteLine($"Payload: {message.Payload}");
+        // Console.WriteLine("Received Message");
+        // EnqueueMessage(message, "public/hostId");
     }
 }
