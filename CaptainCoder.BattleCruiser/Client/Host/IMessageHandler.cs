@@ -13,20 +13,20 @@ public class AcceptingConfigMessageHandler : IMessageHandler
         INetworkPayload payload = message.Payload;
         Action action = payload switch
         {
-            GridConfigMessage(GridConfig config) => () => HandleGridConfig(config, message.ClientId),
-            _ => () => ReplyWithInvalidConfig(message.ClientId),
+            GridConfigMessage(GridConfig config) => () => HandleGridConfig(config, message.From),
+            _ => () => ReplyWithInvalidConfig(message.From),
         };
         action.Invoke();
     }
 
-    private void HandleGridConfig(GridConfig config, string clientId)
+    private void HandleGridConfig(GridConfig config, string username)
     {
         // TODO: Check that config is valid
         INetworkPayload configAcceptedPayload = new ConfigAcceptedMessage();
-        _host.EnqueueMessage(configAcceptedPayload, $"private/{clientId}");
+        _host.EnqueueMessage(configAcceptedPayload, $"private/{username}");
         // TODO: Generate nickname for client and send that rather than clientId
-        INetworkPayload playerJoinedPayload = new PlayerJoinedMessage(clientId);
-        _host.EnqueueMessage(playerJoinedPayload, $"public/hostId");
+        INetworkPayload playerJoinedPayload = new PlayerJoinedMessage(username);
+        _host.EnqueueMessage(playerJoinedPayload, $"public/{_host.UserName}");
     }
 
     private void ReplyWithInvalidConfig(string clientId)

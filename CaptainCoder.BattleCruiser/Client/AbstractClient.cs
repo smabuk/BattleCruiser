@@ -130,10 +130,11 @@ public abstract class AbstractClient : IClient
     {
         return Task.Run(() =>
         {
-            MqttApplicationMessage message =  args.ApplicationMessage;
+            MqttApplicationMessage message = args.ApplicationMessage;
             byte[] payload = message.PayloadSegment.ToArray();
+            string username = message.ResponseTopic.Split("/")[1];
             INetworkPayload networkPayload = NetworkSerializer.Deserialize<INetworkPayload>(payload);
-            NetworkMessage networkMessage = new NetworkMessage(args.ClientId, networkPayload);
+            NetworkMessage networkMessage = new (username, networkPayload);
             Log($"Received Message: {networkMessage}");
             OnMessageReceived?.Invoke(networkMessage);
         });

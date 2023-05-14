@@ -6,8 +6,8 @@ namespace CaptainCoder.BattleCruiser.Server;
 
 public class BattleCruiserMessageBroker
 {
-    private ConcurrentDictionary<string, bool> _usernames = new ();
-    private ConcurrentDictionary<string, string> _clientIdToUserName = new ();
+    private ConcurrentDictionary<string, bool> _usernames = new();
+    private ConcurrentDictionary<string, string> _clientIdToUserName = new();
     public BattleCruiserMessageBroker(int port, bool logging = false) => (Port, Logging) = (port, logging);
     public int Port { get; }
     public bool Logging { get; }
@@ -15,13 +15,13 @@ public class BattleCruiserMessageBroker
 
     public async Task Start()
     {
-         /*
-         * This sample starts a simple MQTT server and prints the logs to the output.
-         *
-         * IMPORTANT! Do not enable logging in live environment. It will decrease performance.
-         *
-         * See sample "Run_Minimal_Server" for more details.
-         */
+        /*
+        * This sample starts a simple MQTT server and prints the logs to the output.
+        *
+        * IMPORTANT! Do not enable logging in live environment. It will decrease performance.
+        *
+        * See sample "Run_Minimal_Server" for more details.
+        */
 
         var mqttFactory = Logging ? new MqttFactory(new ConsoleLogger()) : new MqttFactory();
 
@@ -51,52 +51,114 @@ public class BattleCruiserMessageBroker
 
     private Task OnSubscribe(InterceptingSubscriptionEventArgs args)
     {
-        
-        string[] topics = args.TopicFilter.Topic.Split("/");
         Console.ForegroundColor = ConsoleColor.DarkYellow;
-        Console.WriteLine($"On Subscribe: {args.TopicFilter.Topic} ... {string.Join(", ", topics)}");
+        Console.WriteLine($"Subscription request: {args.TopicFilter.Topic}");
+        if (!ValidateSubscription(args))
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"Subscription failed: {args.ReasonString}");
+        }
+        else
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Subscription successful!");
+        }
         Console.ResetColor();
+        return Task.CompletedTask;
+    }
+
+    private bool ValidateSubscription(InterceptingSubscriptionEventArgs args)
+    {
+        string[] topics = args.TopicFilter.Topic.Split("/");
         if (topics.Length != 2)
         {
             args.ProcessSubscription = false;
             args.ReasonString = "Invalid topic. Expected public/private followed by a Username. E.g. public/UserName or private/UserName";
-            return Task.CompletedTask;
+            return false;
         }
 
-        if (topics[0] == "public")
-        {
-            return Task.CompletedTask;
-        }
+        if (topics[0] == "public") { return true; }
         if (topics[0] != "private")
         {
             args.ProcessSubscription = false;
             args.ReasonString = "Invalid topic. Expected public/private followed by a Username. E.g. public/UserName or private/UserName";
-            return Task.CompletedTask;
+            return false;
         }
         // You can only subscribe to your own private channel *IF* you are that user
-        if(!_clientIdToUserName.TryGetValue(args.ClientId, out string? username))
+        if (!_clientIdToUserName.TryGetValue(args.ClientId, out string? username))
         {
             args.ProcessSubscription = false;
             args.ReasonString = "Could not validate username. Please reconnect to server.";
-            return Task.CompletedTask;
+            return false;
         }
 
         if (topics[1] != username)
         {
             args.ProcessSubscription = false;
             args.ReasonString = "You may only subscribe to your own private channel.";
-            Console.WriteLine($"Sub failed");
-            Console.ResetColor();
-            return Task.CompletedTask;
+            return false;
         }
 
-        Console.WriteLine($"Successfully subscribed to {args.TopicFilter.Topic}");
-        return Task.CompletedTask;
+        return true;
     }
 
     private Task OnPublish(InterceptingPublishEventArgs args)
     {
-        throw new NotImplementedException();
+        Console.ForegroundColor = ConsoleColor.DarkYellow;
+        Console.WriteLine($"Publish request: {args.ApplicationMessage.Topic}");
+        if (!ValidatePublish(args, out string? username))
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            args.Response.ReasonCode = MQTTnet.Protocol.MqttPubAckReasonCode.TopicNameInvalid;
+            Console.WriteLine($"Publish failed: {args.Response.ReasonString}");
+        }
+        else
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Subscription successful!");
+            args.ApplicationMessage.ResponseTopic = $"private/{username}";
+        }
+        Console.ResetColor();
+        return Task.CompletedTask;
+    }
+
+    private bool ValidatePublish(InterceptingPublishEventArgs args, out string? username)
+    {
+        string[] topics = args.ApplicationMessage.Topic.Split("/");
+
+        if (!_clientIdToUserName.TryGetValue(args.ClientId, out username))
+        {
+            args.ProcessPublish = false;
+            args.Response.ReasonString = "Could not validate username. Please reconnect to server.";
+            return false;
+        }
+
+        if (topics.Length != 2)
+        {
+            args.ProcessPublish = false;
+
+            args.Response.ReasonString = "Invalid topic. Expected public/private followed by a Username. E.g. public/UserName or private/UserName";
+            return false;
+        }
+
+        if (topics[0] == "private") { return true; }
+        if (topics[0] != "public")
+        {
+            args.ProcessPublish = false;
+            args.Response.ReasonString = "Invalid topic. Expected public/private followed by a Username. E.g. public/UserName or private/UserName";
+            return false;
+        }
+        // You can only subscribe to your own private channel *IF* you are that user
+
+
+        if (topics[1] != username)
+        {
+            args.ProcessPublish = false;
+            args.Response.ReasonString = "You may only publish to your own public channel.";
+            return false;
+        }
+
+        return true;
     }
 
     private Task OnValidateConnection(ValidatingConnectionEventArgs args)
@@ -107,7 +169,7 @@ public class BattleCruiserMessageBroker
             args.ReasonString = $"The specified username {args.UserName} is already in use.";
             return Task.CompletedTask;
         }
-        
+
         if (!_clientIdToUserName.TryAdd(args.ClientId, args.UserName))
         {
             args.ReasonCode = MQTTnet.Protocol.MqttConnectReasonCode.ClientIdentifierNotValid;
@@ -120,7 +182,7 @@ public class BattleCruiserMessageBroker
 
     private Task OnDisconnect(ClientDisconnectedEventArgs args)
     {
-        if(_clientIdToUserName.Remove(args.ClientId, out string? username))
+        if (_clientIdToUserName.Remove(args.ClientId, out string? username))
         {
             _usernames.Remove(username, out _);
         }

@@ -1,3 +1,3 @@
 namespace CaptainCoder.BattleCruiser.Client;
 
-public record NetworkMessage(string ClientId, INetworkPayload Payload);
+public record NetworkMessage(string From, INetworkPayload Payload);
