@@ -67,6 +67,7 @@ public class BattleCruiserMessageBroker
         return Task.CompletedTask;
     }
 
+    // [public|private]/{UserName}
     private bool ValidateSubscription(InterceptingSubscriptionEventArgs args)
     {
         string[] topics = args.TopicFilter.Topic.Split("/");
