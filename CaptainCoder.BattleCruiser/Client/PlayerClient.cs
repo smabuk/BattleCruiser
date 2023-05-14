@@ -9,22 +9,19 @@ namespace CaptainCoder.BattleCruiser.Client;
 
 public class PlayerClient : AbstractClient
 {
-    public PlayerClient(string host, int port) : base(host, port)
+    public PlayerClient(string host, int port, string username, string hostname) : base(host, port, username)
     {
-        OnConnected += () => Console.WriteLine("Connected!");
+        OnConnected += () => Console.WriteLine($"Connected as Player");
         OnConnecting += () => Console.WriteLine("Connecting...");
         OnDisconnected += () => Console.WriteLine("Disconnected!");
-        OnMessageReceived += PrintNetworkMessage;
+        HostName = hostname;
     }
+
+    public string HostName { get; }
 
     protected override async Task ConnectSubscriptions(IMqttClient client)
     {
-        await SubscribeToTopic("private/clientId", client);
-        await SubscribeToTopic("public/hostId", client);
-    }
-    void PrintNetworkMessage(NetworkMessage message)
-    {
-        Console.WriteLine($"Received Message From: {message.ClientId}");
-        Console.WriteLine($"Message was: {message.Payload}");
+        await base.ConnectSubscriptions(client);
+        await SubscribeToTopic($"public/{HostName}", client);
     }
 }

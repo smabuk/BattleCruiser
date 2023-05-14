@@ -11,7 +11,7 @@ GridConfig config = new(7, 7, ships);
 
 INetworkPayload gridConfigMessage = new GridConfigMessage(config);
 
-PlayerClient playerClient = new ("localhost", 12345);
+PlayerClient playerClient = new ("localhost", 12345, "SomePlayer", "TheCaptainCoder");
 
 playerClient.OnConnected += SendMessageTest;
 
