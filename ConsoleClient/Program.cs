@@ -49,9 +49,7 @@ async Task RunPlayer(Options options)
     {
         Console.WriteLine("Connected!");
         playerClient.EnqueueMessage(gridConfigMessage, "private/TheCaptainCoder");
-    }
-
-    
+    }  
 }
 
 async Task RunHost(Options options)

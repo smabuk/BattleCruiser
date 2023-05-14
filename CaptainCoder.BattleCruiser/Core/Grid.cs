@@ -1,18 +1,32 @@
-namespace CaptainCoder.BattleCruiser;
 using CaptainCoder.Core;
-using System.Text.Json;
-
-public record GridConfig(int Rows, int Cols, ShipConfig[] Ships)
+namespace CaptainCoder.BattleCruiser;
+public class Grid
 {
-    // TODO: Investigate encoding schema
-    public string ToJson() => JsonSerializer.Serialize(this);
-    public static GridConfig? FromJson(string json) => JsonSerializer.Deserialize<GridConfig>(json);
+    private readonly Dictionary<Position, GridMark> _marks = new();
+    
+    public Grid(int rows, int columns) => (Rows, Columns) = (rows, columns);
+
+    public int Rows { get; }
+    public int Columns { get; }
+
+    public void Mark(Position position, GridMark mark)
+    {
+        if (!ValidatePosition(position)) { throw new IndexOutOfRangeException(); }
+        _marks[position] = mark;
+    }
+
+    public void Clear(Position position) 
+    {
+        if (!ValidatePosition(position)) { throw new IndexOutOfRangeException(); }
+        _marks.Remove(position);
+    }
+
+    private bool ValidatePosition(Position position) => !(position.Row < 0 || position.Row >= Rows || position.Col < 0 || position.Col >= Columns);
+
 }
 
-public record struct ShipConfig(Position Position, ShipType ShipType, Orientation Orientation);
-
-public enum Orientation
+public enum GridMark
 {
-    EastWest,
-    NorthSouth
+    Miss,
+    Hit
 }

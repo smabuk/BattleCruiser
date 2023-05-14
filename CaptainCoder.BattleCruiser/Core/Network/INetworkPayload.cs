@@ -16,9 +16,11 @@ public record class GridConfigMessage(GridConfig Config) : INetworkPayload;
 public interface IGridConfigResultMessage : INetworkPayload {};
 
 /// <summary>
-/// Sent when the player's configuration was accepted.
+/// Sent when the player's configuration was accepted. <paramref
+/// name="PlayerIdentifier"/> is the player's anonymous identifier that other
+/// players will see.
 /// </summary>
-public record class ConfigAcceptedMessage : IGridConfigResultMessage;
+public record class ConfigAcceptedMessage(string PlayerIdentifer) : IGridConfigResultMessage;
 
 /// <summary>
 /// Sent when the player's configuration was not accepted.
@@ -39,11 +41,11 @@ public record class PlayerJoinedMessage(string PlayerId) : INetworkPayload;
 public record class PlayerLeftMessage(string PlayerId) : INetworkPayload;
 
 /// <summary>
-/// A <see cref="InitialBattleGridMessage"/> is sent by the server when the
+/// A <see cref="GameStartingMessage"/> is sent by the server when the
 /// battle begins. This message is broadcast to all players.
 /// </summary>
 // TODO: Needs to include Width / Height and Array of UserIDs / position on board
-public record class InitialBattleGridMessage() : INetworkPayload;
+public record class GameStartingMessage(string[] PlayerIdentifiers) : INetworkPayload;
 
 public record class FireMessage(string PlayerId, Position Target) : INetworkPayload;
 public interface IFireMessageResult : INetworkPayload {} 

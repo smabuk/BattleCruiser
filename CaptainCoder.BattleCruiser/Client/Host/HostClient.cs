@@ -10,7 +10,7 @@ namespace CaptainCoder.BattleCruiser.Client;
 // Devs always confuse halloween and christmas because Oct 31 equals Dec 25
 public class GameHostClient : AbstractClient
 {
-    private IMessageHandler _messageHandler;
+    private IGameState _messageHandler;
     public GameHostClient(string host, int port, string username) : base(host, port, username)
     {
         OnMessageReceived += ProcessReceivedMessages;
@@ -21,8 +21,10 @@ public class GameHostClient : AbstractClient
     {
         Console.WriteLine($"Received message from {message.From}");
         Console.WriteLine($"Payload: {message.Payload}");
-        _messageHandler.Handle(message);
+        _messageHandler.HandleMessage(message);
     }
+
+    
 }
 public enum HostState
 {

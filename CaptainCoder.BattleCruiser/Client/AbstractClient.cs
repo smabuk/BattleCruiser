@@ -13,7 +13,6 @@ public abstract class AbstractClient : IClient
     private bool _requestDisconnect = false;
     private MqttFactory _mqttFactory = new();
     private ConcurrentQueue<OutboxMessage> _outbox = new();
-    private string? _clientId;
 
     private ILogger? _logger;
     private ILogger Logger 
@@ -37,10 +36,10 @@ public abstract class AbstractClient : IClient
     public int Port { get; }
     public string UserName { get; }
     
-    public event Action OnConnected;
-    public event Action OnDisconnected;
-    public event Action OnConnecting;
-    public event Action<NetworkMessage> OnMessageReceived;
+    public event Action? OnConnected;
+    public event Action? OnDisconnected;
+    public event Action? OnConnecting;
+    public event Action<NetworkMessage>? OnMessageReceived;
 
     public async Task Connect()
     {
@@ -103,6 +102,8 @@ public abstract class AbstractClient : IClient
         }
     }
 
+    public void BroadcastMessage(INetworkPayload toSend) => EnqueueMessage(toSend, $"public/{UserName}");
+    public void PrivateMessage(INetworkPayload toSend, string username) => EnqueueMessage(toSend, $"private/{username}");
     public void EnqueueMessage(INetworkPayload toSend, string topic)
     {
         Log($"EnqueuingMessage: {toSend}");
