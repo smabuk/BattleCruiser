@@ -1,7 +1,9 @@
 using CaptainCoder.Core;
+using CaptainCoder.Core.Collections;
+
 namespace CaptainCoder.BattleCruiser;
 
-public interface INetworkPayload {}
+public interface INetworkPayload  {}
 
 /// <summary>
 /// A <see cref="GridConfigMessage"/> is sent by a client when they join a game
@@ -44,7 +46,6 @@ public record class PlayerLeftMessage(string PlayerId) : INetworkPayload;
 /// A <see cref="GameStartingMessage"/> is sent by the server when the
 /// battle begins. This message is broadcast to all players.
 /// </summary>
-// TODO: Needs to include Width / Height and Array of UserIDs / position on board
 public record class GameStartingMessage(string[] PlayerIdentifiers) : INetworkPayload;
 
 public record class FireMessage(string PlayerId, Position Target) : INetworkPayload;
@@ -52,11 +53,10 @@ public interface IFireMessageResult : INetworkPayload {}
 public record class FireAcceptedMessage : IFireMessageResult;
 public record class FireRejectedMessage(string Message) : IFireMessageResult;
 
-// TODO: Needs to include Round #, Hit / Miss information, Eliminated Player Info
-public record class RoundResult() : INetworkPayload;
+public record class RoundResultMessage(int RoundNumber, FireResult[] Results) : INetworkPayload;
+public record class FireResult(string PlayerId, Position Position, GridMark Mark);
 
-
-public record class GameResult(int TotalRounds, string[] WinnerIds) : INetworkPayload;
+public record class GameResultMessage(int TotalRounds, string[] WinnerIds) : INetworkPayload;
 
 
 // public record class 

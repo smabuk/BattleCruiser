@@ -61,10 +61,6 @@ async Task RunHost(Options options)
     await hostClient.Connect();
 }
 
-void HandleErrors(IEnumerable<Error> errors)
-{
-
-}
 
 bool ValidateHostName(string? name)
 {
@@ -89,7 +85,7 @@ string PromptUser(string prompt, Predicate<string?> validator)
 class Options
 {
     [Option('u', "username", Required = true, HelpText = "The UserName to connect with.")]
-    public string UserName { get; set; }
+    public string UserName { get; set; } = null!;
     [Option('i', "ip", Required = false, HelpText = "The IP Address of the MQTT server. Defaults to localhost")]
     public string IP { get; set; } = "localhost";
     [Option('p', "port", Required = false, HelpText = "The port to connect to. Defaults to 12345")]

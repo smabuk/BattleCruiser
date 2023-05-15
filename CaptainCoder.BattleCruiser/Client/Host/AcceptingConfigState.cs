@@ -1,3 +1,5 @@
+using CaptainCoder.Core.Collections;
+
 namespace CaptainCoder.BattleCruiser.Client;
 
 public class AcceptingConfigMessageHandler : IGameState
@@ -20,7 +22,6 @@ public class AcceptingConfigMessageHandler : IGameState
     public IGameState ProcessState()
     {
         // TODO: Generate board, notify players, then start game
-        // _host.EnqueueMessage(new GameStartingMessage(_identifierLookup.Keys.ToArray()), 
         _host.BroadcastMessage(new GameStartingMessage(_identifierLookup.Keys.ToArray()));
         return new RunningGameState(_host);
     }
