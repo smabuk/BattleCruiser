@@ -29,11 +29,11 @@ async Task RunPlayer(Options options)
     playerClient.IsLogging = true;
     // await playerClient.Connect();
 
-    ShipConfig[] ships = new ShipConfig[]
+    Ship[] ships = new Ship[]
         {
-            new ShipConfig((0, 0), ShipType.Battleship, Orientation.EastWest),
-            new ShipConfig((1, 0), ShipType.Destroyer, Orientation.NorthSouth),
-            new ShipConfig((2, 1), ShipType.Submarine, Orientation.EastWest),
+            new Ship((0, 0), ShipType.Battleship, Orientation.EastWest),
+            new Ship((1, 0), ShipType.Destroyer, Orientation.NorthSouth),
+            new Ship((2, 1), ShipType.Submarine, Orientation.EastWest),
         };
     GridConfig config = new(7, 7, ships);
 

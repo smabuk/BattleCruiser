@@ -23,5 +23,8 @@ public class PlayerGrids
         }
         return grid;
     }
+
+    public void ApplyResults(IEnumerable<FireResult> results) => results.ForEach(ApplyResult);
+    public void ApplyResult(FireResult result) => _playerGrids[result.PlayerId].Mark(result.Position, result.Mark);
 }
 
