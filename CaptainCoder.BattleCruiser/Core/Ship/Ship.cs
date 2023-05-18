@@ -13,4 +13,6 @@ public record struct Ship(Position Position, ShipType ShipType, Orientation Orie
             yield return Position + (increment * offset);
         }        
     }
+
+    public bool HasPosition(Position position) => Positions().Contains(position);
 }
