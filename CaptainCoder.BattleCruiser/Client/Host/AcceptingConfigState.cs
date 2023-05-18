@@ -6,7 +6,7 @@ public class AcceptingConfigMessageHandler : IGameState
 {
     private readonly GameHostClient _host;
     private readonly Dictionary<string, GridConfig> _grids = new();
-    private readonly Dictionary<string, string> _identifierLookup = new();
+
     public AcceptingConfigMessageHandler(GameHostClient host) => _host = host;
     public void HandleMessage(NetworkMessage message)
     {
@@ -22,7 +22,7 @@ public class AcceptingConfigMessageHandler : IGameState
     public IGameState ProcessState()
     {
         // TODO: Generate board, notify players, then start game
-        _host.BroadcastMessage(new GameStartingMessage(_identifierLookup.Keys.ToArray()));
+        // _host.BroadcastMessage(new GameStartingMessage(_identifierLookup.Keys.ToArray()));
         return new RunningGameState(_host);
     }
 
@@ -50,13 +50,6 @@ public class AcceptingConfigMessageHandler : IGameState
 
     private string UserIdentifier(string username)
     {
-        if (_identifierLookup.TryGetValue(username, out string? identifier))
-        {
-            return identifier;
-        }
-        // TODO: Implement name generator
-        identifier = $"Player_{_identifierLookup.Count}";
-        _identifierLookup[username] = identifier;
-        return identifier;
+        return string.Empty;
     }
 }

@@ -30,8 +30,7 @@ public class NameGeneratorTests
         string[] noun = { "Cat", "Frog" };
 
         Mock<IRandom> randomMock = new();
-        randomMock.Setup((random) => random.Next(0, 3)).Returns(2); // Tiny
-        randomMock.Setup((random) => random.Next(0, 3)).Returns(1); // Slow
+        randomMock.SetupSequence((random) => random.Next(0, 3)).Returns(2).Returns(1); // Tiny, Slow
         randomMock.Setup((random) => random.Next(0, 4)).Returns(1); // Blue
         randomMock.Setup((random) => random.Next(0, 2)).Returns(0); // Cat
         NameGenerator generator = new(size, speed, color, noun);
