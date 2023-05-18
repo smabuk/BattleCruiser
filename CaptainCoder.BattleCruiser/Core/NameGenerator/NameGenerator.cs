@@ -1,11 +1,6 @@
 using System.Text;
 using CaptainCoder.Core;
 namespace CaptainCoder.BattleCruiser;
-
-
-// Big, Small, Tiny, Gigantic
-// Red, Green , Blue, Yellow, etc.
-// Dog, Cat, Frog, Gorilla, 
 public class NameGenerator
 {
     private readonly string[][] _wordGroups;
