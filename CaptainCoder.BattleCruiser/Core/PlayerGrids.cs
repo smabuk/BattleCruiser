@@ -25,6 +25,6 @@ public class PlayerGrids
     }
 
     public void ApplyResults(IEnumerable<FireResult> results) => results.ForEach(ApplyResult);
-    public void ApplyResult(FireResult result) => _playerGrids[result.PlayerId].Mark(result.Position, result.Mark);
+    public void ApplyResult(FireResult result) => _playerGrids[result.PlayerId][result.Position] = result.Mark;
 }
 
