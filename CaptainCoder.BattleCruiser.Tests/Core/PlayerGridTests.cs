@@ -60,7 +60,7 @@ public class PlayerGridTests
         Assert.True(grid.IsAlive);
         #endregion
 
-        #region Validate IGridInfo
+        #region Validate Marks
         Dictionary<Position, IGridMark> expectedMarks = new ()
         {
             {(0, 0), IGridMark.Hit(ShipType.Battleship)},
@@ -102,6 +102,36 @@ public class PlayerGridTests
         expected = new SunkResult(ShipType.Submarine);
         Assert.Equal(expected, result);
         Assert.False(grid.IsAlive);
+        #endregion
+
+        #region Validate Marks
+            // B.DD...
+            // B......
+            // B......
+            // B......
+            // ......S
+            // ......S
+            // ......S
+        expectedMarks = new ()
+        {
+            {(0, 0), IGridMark.Hit(ShipType.Battleship)},
+            {(1, 0), IGridMark.Hit(ShipType.Battleship)},
+            {(2, 0), IGridMark.Hit(ShipType.Battleship)},
+            {(3, 0), IGridMark.Hit(ShipType.Battleship)},
+            
+            {(0, 1), IGridMark.Miss},
+            {(1, 1), IGridMark.Miss},
+
+            {(0, 2), IGridMark.Hit(ShipType.Destroyer)},
+            {(0, 3), IGridMark.Hit(ShipType.Destroyer)},
+
+            {(4, 6), IGridMark.Hit(ShipType.Submarine)},
+            {(5, 6), IGridMark.Hit(ShipType.Submarine)},
+            {(6, 6), IGridMark.Hit(ShipType.Submarine)},
+        };
+        actualMarks = grid.Grid.Marks;
+        Assert.Equal(expectedMarks.Count, actualMarks.Count);
+        Assert.True(expectedMarks.KeyValuePairEquals(actualMarks));
         #endregion
     }
 }
