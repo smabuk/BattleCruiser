@@ -1,10 +1,14 @@
 using CaptainCoder.Core;
 using System.Linq;
 namespace CaptainCoder.BattleCruiser;
-public class Grid
+/// <summary>
+/// An <see cref="InfoGrid"/> represents a grid containing information about
+/// positions that have been attacked.
+/// </summary>
+public class InfoGrid
 {
     private readonly Dictionary<Position, GridMark> _marks = new();
-    public Grid(int rows, int columns) => (Rows, Columns) = (rows, columns);
+    public InfoGrid(int rows, int columns) => (Rows, Columns) = (rows, columns);
     public int Rows { get; }
     public int Columns { get; }
 
