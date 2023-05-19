@@ -11,9 +11,9 @@ public class GridConfigTest
     {
         Ship[] ships = new Ship[]
         {
-            new Ship((0, 0), ShipType.Battleship, Orientation.EastWest),
-            new Ship((1, 0), ShipType.Destroyer, Orientation.NorthSouth),
-            new Ship((2, 1), ShipType.Submarine, Orientation.EastWest),
+            new Ship((0, 0), ShipType.Battleship, Orientation.Horizontal),
+            new Ship((1, 0), ShipType.Destroyer, Orientation.Vertical),
+            new Ship((2, 1), ShipType.Submarine, Orientation.Horizontal),
         };
         PlayerConfig config = new (ships);
         GridConfigMessage original = new (config);
@@ -32,7 +32,7 @@ public class GridConfigTest
     {
         Ship[] ships = new Ship[]
         {
-            new Ship((2, 2), ShipType.Destroyer, Orientation.EastWest),
+            new Ship((2, 2), ShipType.Destroyer, Orientation.Horizontal),
         };
         PlayerConfig config = new (ships);
         GridConfigMessage original = new (config);
