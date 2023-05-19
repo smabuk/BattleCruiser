@@ -11,8 +11,8 @@ public interface IPlayerGrid
     public AttackResult Attack(Position position);
 }
 
-public record AttackResult(GridMark Mark);
-public record SunkResult(ShipType Ship) : AttackResult (GridMark.Hit);
+public record AttackResult(IGridMark Mark);
+public record SunkResult(ShipType Ship) : AttackResult (IGridMark.Hit(Ship));
 
 internal class PlayerGrid : IPlayerGrid
 {
@@ -32,8 +32,7 @@ internal class PlayerGrid : IPlayerGrid
 
     public AttackResult Attack(Position position)
     {
-        GridMark mark = _grid[position];
-        if (mark != GridMark.Unknown) { return new AttackResult(mark); }
+        if (_grid.Marks.TryGetValue(position, out IGridMark mark)) { return new AttackResult(mark); }
         foreach (ShipHitInfo ship in _ships)
         {
             if (ship.HasPosition(position))
@@ -41,16 +40,16 @@ internal class PlayerGrid : IPlayerGrid
                 return MarkShip(ship, position);
             }
         }
-        _grid[position] = GridMark.Miss;
-        return new AttackResult(GridMark.Miss);
+        _grid[position] = IGridMark.Miss;
+        return new AttackResult(IGridMark.Miss);
     }
 
-    private AttackResult MarkShip(ShipHitInfo ship, Position position)
+    private AttackResult MarkShip(ShipHitInfo shipInfo, Position position)
     {
-        ship.MarkHit(position);
-        _grid[position] = GridMark.Hit;
-        if (ship.IsAlive) { return new AttackResult(GridMark.Hit); }
-        return new SunkResult(ship.Ship.ShipType);
+        shipInfo.MarkHit(position);
+        _grid[position] = IGridMark.Hit(shipInfo.Ship.ShipType);
+        if (shipInfo.IsAlive) { return new AttackResult(IGridMark.Hit(shipInfo.Ship.ShipType)); }
+        return new SunkResult(shipInfo.Ship.ShipType);
     }
 }
 

@@ -107,9 +107,9 @@ public class GridConfigTest
     {
         FireResult[] results = 
         {
-            new FireResult("Player1", (0, 0), GridMark.Hit),
-            new FireResult("Player2", (5, 5), GridMark.Miss),
-            new FireResult("Player2", (3, 5), GridMark.Hit),
+            new FireResult("Player1", (0, 0), IGridMark.Hit(ShipType.Battleship)),
+            new FireResult("Player2", (5, 5), IGridMark.Miss),
+            new FireResult("Player2", (3, 5), IGridMark.Hit(ShipType.Destroyer)),
         };
         // TODO: Explore Property generator for range of ints rather than any int
         RoundResultMessage payload = new (1, results);
@@ -126,9 +126,9 @@ public class GridConfigTest
     {
         FireResult[] results = 
         {
-            new FireResult("Stephen", (5, 5), GridMark.Miss),
-            new FireResult("Player1", (0, 0), GridMark.Miss),            
-            new FireResult("Player2", (3, 5), GridMark.Hit),
+            new FireResult("Stephen", (5, 5), IGridMark.Miss),
+            new FireResult("Player1", (0, 0), IGridMark.Miss),            
+            new FireResult("Player2", (3, 5), IGridMark.Hit(ShipType.Submarine)),
         };
         // TODO: Explore Property generator for range of ints rather than any int
         RoundResultMessage payload = new (1, results);

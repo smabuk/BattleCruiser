@@ -1,10 +1,14 @@
 using CaptainCoder.Core;
+using System.Collections;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text.Json.Serialization;
+
 namespace CaptainCoder.BattleCruiser;
 
 public interface IInfoGrid
 {
-    GridMark this[Position position] { get; }
+    public IReadOnlyDictionary<Position, IGridMark> Marks { get; }
     public int Rows { get; }
     public int Columns { get; }
 }
@@ -15,16 +19,17 @@ public interface IInfoGrid
 /// </summary>
 internal class InfoGrid : IInfoGrid
 {
-    private readonly Dictionary<Position, GridMark> _marks = new();
+    private readonly Dictionary<Position, IGridMark> _marks = new();
+    public IReadOnlyDictionary<Position, IGridMark> Marks => new ReadOnlyDictionary<Position, IGridMark>(_marks);
     public int Rows { get; } = GridConfigValidator.ExpectedRows;
     public int Columns { get; } = GridConfigValidator.ExpectedCols;
 
-    public GridMark this[Position position]
+    public IGridMark this[Position position]
     {
         get 
         {
             if (!ValidatePosition(position)) { throw new IndexOutOfRangeException(); }
-            return _marks.GetValueOrDefault(position, GridMark.Unknown);
+            return _marks[position];
         }
         set
         {
@@ -40,12 +45,15 @@ internal class InfoGrid : IInfoGrid
     }
 
     private bool ValidatePosition(Position position) => !(position.Row < 0 || position.Row >= Rows || position.Col < 0 || position.Col >= Columns);
-
 }
 
-public enum GridMark
+[JsonDerivedType(typeof(MissMark), typeDiscriminator: "miss")]
+[JsonDerivedType(typeof(HitMark), typeDiscriminator: "hit")]
+public interface IGridMark
 {
-    Unknown,
-    Miss,
-    Hit
+    public static readonly MissMark Miss = new ();
+    public static HitMark Hit(ShipType type) => new (type);
+
 }
+public record MissMark : IGridMark;
+public record HitMark(ShipType Type) : IGridMark;
