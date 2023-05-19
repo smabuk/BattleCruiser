@@ -4,7 +4,6 @@ namespace CaptainCoder.BattleCruiser;
 public class NameGenerator
 {
     private readonly string[][] _wordGroups;
-    private readonly StringBuilder _builder = new();
     public NameGenerator(IEnumerable<string> firstWords, params IEnumerable<string>[] additionalWords)
     {
         _wordGroups = new string[additionalWords.Length + 1][];
@@ -17,13 +16,13 @@ public class NameGenerator
 
     public string GenerateName(IRandom randomSource)
     {
-        _builder.Clear();
+        StringBuilder builder = new();
         foreach (string[] wordGroup in _wordGroups)
         {
             int randomIx = randomSource.Next(0, wordGroup.Length);
-            _builder.Append(wordGroup[randomIx]);
+            builder.Append(wordGroup[randomIx]);
         }
-        return _builder.ToString();
+        return builder.ToString();
     }
 
     public string GenerateName() => GenerateName(IRandom.Shared);
