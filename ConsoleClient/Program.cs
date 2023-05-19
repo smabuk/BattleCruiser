@@ -35,7 +35,7 @@ async Task RunPlayer(Options options)
             new Ship((1, 0), ShipType.Destroyer, Orientation.NorthSouth),
             new Ship((2, 1), ShipType.Submarine, Orientation.EastWest),
         };
-    PlayerConfig config = new(7, 7, ships);
+    PlayerConfig config = new(ships);
 
     INetworkPayload gridConfigMessage = new GridConfigMessage(config);
 

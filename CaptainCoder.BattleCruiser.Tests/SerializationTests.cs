@@ -15,7 +15,7 @@ public class GridConfigTest
             new Ship((1, 0), ShipType.Destroyer, Orientation.NorthSouth),
             new Ship((2, 1), ShipType.Submarine, Orientation.EastWest),
         };
-        PlayerConfig config = new (7, 7, ships);
+        PlayerConfig config = new (ships);
         GridConfigMessage original = new (config);
 
         byte[] serialized = NetworkSerializer.Serialize(original);
@@ -23,8 +23,6 @@ public class GridConfigTest
         Assert.NotNull(deserialized);
         Assert.True(deserialized is GridConfigMessage);
         GridConfigMessage actual = (GridConfigMessage)deserialized;
-        Assert.Equal(original.Config.Cols, actual.Config.Cols);
-        Assert.Equal(original.Config.Rows, actual.Config.Rows);
         // Assert.Equal(original.Config.Ships, actual.Config.Ships);
         Assert.Equivalent(original, deserialized, strict: true);
     }
@@ -36,7 +34,7 @@ public class GridConfigTest
         {
             new Ship((2, 2), ShipType.Destroyer, Orientation.EastWest),
         };
-        PlayerConfig config = new (4, 4, ships);
+        PlayerConfig config = new (ships);
         GridConfigMessage original = new (config);
 
         byte[] serialized = NetworkSerializer.Serialize(original);
@@ -44,8 +42,6 @@ public class GridConfigTest
         Assert.NotNull(deserialized);
         Assert.True(deserialized is GridConfigMessage);
         GridConfigMessage actual = (GridConfigMessage)deserialized;
-        Assert.Equal(original.Config.Cols, actual.Config.Cols);
-        Assert.Equal(original.Config.Rows, actual.Config.Rows);
         Assert.Equal(original.Config.Ships, actual.Config.Ships);
         Assert.Equivalent(original, deserialized, strict: true);
     } 
