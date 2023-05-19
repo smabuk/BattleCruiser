@@ -42,7 +42,7 @@ public class GridConfigTest
         Assert.NotNull(deserialized);
         Assert.True(deserialized is GridConfigMessage);
         GridConfigMessage actual = (GridConfigMessage)deserialized;
-        Assert.Equal(original.Config.Ships, actual.Config.Ships);
+        Assert.True(original.Config.Ships.SequenceEqual(actual.Config.Ships));
         Assert.Equivalent(original, deserialized, strict: true);
     } 
 

@@ -7,7 +7,7 @@ public static class GridConfigValidator
     public static int ExpectedCols { get; set; } = 7;
     public static ValidationResult Validate(this PlayerConfig config)
     {
-        if (config.Ships.Length != 3) { return new MissingShipResult(); }
+        if (config.Ships.Count() != 3) { return new MissingShipResult(); }
         HashSet<Position> occupied = new();
         HashSet<ShipType> types = new ();
         bool ValidPosition(Position p) =>
