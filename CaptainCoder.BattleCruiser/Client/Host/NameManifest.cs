@@ -1,6 +1,18 @@
 namespace CaptainCoder.BattleCruiser.Client;
 
-public class NameManifest
+public interface INameManifest
+{
+    public IReadOnlyCollection<string> NickNames { get; }
+    public IReadOnlyCollection<string> UserNames { get; }
+
+    /// <summary>
+    /// Given a <paramref name="username"/> retrieves the users nickname. Returns
+    /// true if a nickname was generated and false if the nickname was already found.
+    /// </summary>
+    public bool GetNickName(string username, out string nickname);
+}
+
+public class NameManifest : INameManifest
 {
     public static readonly NameGenerator NicknameGenerator;
 
@@ -40,11 +52,11 @@ public class NameManifest
     /// <summary>
     /// Retrieves all UserNames that have been added to this manifest.
     /// </summary>
-    public IEnumerable<string> UserNames => _userNametoNickName.Keys;
+    public IReadOnlyCollection<string> UserNames => _userNametoNickName.Keys;
     /// <summary>
     /// Retrieves all NickNames that have been added to this manifest.
     /// </summary>
-    public IEnumerable<string> NickNames => _nickNametoUserName.Keys;
+    public IReadOnlyCollection<string> NickNames => _nickNametoUserName.Keys;
 
     /// <summary>
     /// Given a <paramref name="username"/> retrieves the users nickname. Returns
@@ -52,7 +64,7 @@ public class NameManifest
     /// </summary>
     public bool GetNickName(string username, out string nickname)
     {
-        if(_userNametoNickName.TryGetValue(username, out nickname))
+        if (_userNametoNickName.TryGetValue(username, out nickname))
         {
             return false;
         }
