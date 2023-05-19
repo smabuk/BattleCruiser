@@ -9,7 +9,7 @@ public interface INetworkPayload  {}
 /// A <see cref="GridConfigMessage"/> is sent by a client when they join a game
 /// to specify their grid state.
 /// </summary>
-public record class GridConfigMessage(GridConfig Config) : INetworkPayload;
+public record class GridConfigMessage(PlayerConfig Config) : INetworkPayload;
 
 /// <summary>
 /// A <see cref="IGridConfigResultMessage"/> is sent by the server to acknowledge a

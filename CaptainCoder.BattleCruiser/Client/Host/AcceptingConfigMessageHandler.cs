@@ -9,15 +9,15 @@ namespace CaptainCoder.BattleCruiser.Client;
 public sealed class AcceptingConfigMessageHandler : IMessageHandler
 {
     private static INetworkPayload[] s_NotAcceptingConfigs = { new InvalidConfigMessage("Only accepting Config messages at this time.") };
-    private readonly Dictionary<string, GridConfig> _configs = new();
+    private readonly Dictionary<string, PlayerConfig> _configs = new();
     private readonly NameManifest _nickNames = new();
     public AcceptingConfigMessageHandler()
     {
-        Configs = new ReadOnlyDictionary<string, GridConfig>(_configs);
+        Configs = new ReadOnlyDictionary<string, PlayerConfig>(_configs);
     }
 
     public INameManifest NickNames => _nickNames;
-    public IReadOnlyDictionary<string, GridConfig> Configs { get; private set; }
+    public IReadOnlyDictionary<string, PlayerConfig> Configs { get; private set; }
     public IEnumerable<INetworkPayload> HandleMessage(NetworkMessage message)
     {
         if (message.Payload is not GridConfigMessage)
@@ -25,7 +25,7 @@ public sealed class AcceptingConfigMessageHandler : IMessageHandler
             return s_NotAcceptingConfigs;
         }
 
-        GridConfig config = ((GridConfigMessage)message.Payload).Config;
+        PlayerConfig config = ((GridConfigMessage)message.Payload).Config;
         ValidationResult validation = config.Validate();
         if (!validation.IsValid)
         {

@@ -5,7 +5,7 @@ public static class GridConfigValidator
 {
     public static int ExpectedRows { get; set; } = 7;
     public static int ExpectedCols { get; set; } = 7;
-    public static ValidationResult Validate(this GridConfig config)
+    public static ValidationResult Validate(this PlayerConfig config)
     {
         if (config.Rows != ExpectedRows && config.Cols != ExpectedCols) { return new InvalidDimensions(ExpectedRows, ExpectedCols); }
         if (config.Ships.Length != 3) { return new MissingShipResult(); }

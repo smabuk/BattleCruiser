@@ -2,7 +2,7 @@ namespace CaptainCoder.BattleCruiser.Client;
 
 public class GameRunningMessageHandler : IMessageHandler
 {
-    private readonly Dictionary<string, GridConfig> _grids = new();
+    private readonly Dictionary<string, PlayerConfig> _grids = new();
     // public GameRunningMessageHandler(NameManifest manifest, Dictionary<string, GridConfig>) => _host = host;
 
     public IEnumerable<INetworkPayload> HandleMessage(NetworkMessage message)

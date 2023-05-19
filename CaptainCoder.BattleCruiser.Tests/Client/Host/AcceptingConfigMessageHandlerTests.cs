@@ -14,7 +14,7 @@ public class AcceptingConfigMessageHandlerTests
             new Ship((1, 0), ShipType.Destroyer, Orientation.NorthSouth),
             new Ship((2, 1), ShipType.Submarine, Orientation.EastWest),
         };
-        GridConfig config = new(7, 7, ships);
+        PlayerConfig config = new(7, 7, ships);
         VALID_GRID = new GridConfigMessage(config);
 
         ships = Array.Empty<Ship>();
