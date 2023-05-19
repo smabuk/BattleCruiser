@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using CaptainCoder.Core.Collections;
 
 namespace CaptainCoder.BattleCruiser.Client;
@@ -5,10 +6,18 @@ namespace CaptainCoder.BattleCruiser.Client;
 /// <summary>
 /// 
 /// </summary>
-public class AcceptingConfigMessageHandler : IMessageHandler
+public sealed class AcceptingConfigMessageHandler : IMessageHandler
 {
     private static INetworkPayload[] s_NotAcceptingConfigs = { new InvalidConfigMessage("Only accepting Config messages at this time.") };
-    public NameManifest Manifest { get; } = new();
+    private readonly Dictionary<string, GridConfig> _configs = new();
+    private readonly NameManifest _nickNames = new();
+    public AcceptingConfigMessageHandler()
+    {
+        Configs = new ReadOnlyDictionary<string, GridConfig>(_configs);
+    }
+
+    public INameManifest NickNames => _nickNames;
+    public IReadOnlyDictionary<string, GridConfig> Configs { get; private set; }
     public IEnumerable<INetworkPayload> HandleMessage(NetworkMessage message)
     {
         if (message.Payload is not GridConfigMessage)
@@ -24,7 +33,7 @@ public class AcceptingConfigMessageHandler : IMessageHandler
         }
 
         INetworkPayload[]? responses = null;
-        if (Manifest.GetNickName(message.From, out string nickname))
+        if (_nickNames.GetNickName(message.From, out string nickname))
         {
             responses = new INetworkPayload[2];
             // If this is the first time we have seen this username, broadcast playerjoined
@@ -32,6 +41,7 @@ public class AcceptingConfigMessageHandler : IMessageHandler
         }
         responses ??= new INetworkPayload[1];
         responses[0] = new ConfigAcceptedMessage(nickname);
+        _configs[nickname] = config;
         return responses;
     }
 }

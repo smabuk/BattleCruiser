@@ -30,8 +30,8 @@ public class AcceptingConfigMessageHandlerTests
     [Fact]
     public void TestInitialState()
     {
-        Assert.Empty(_handler.Manifest.NickNames);
-        Assert.Empty(_handler.Manifest.UserNames);
+        Assert.Empty(_handler.NickNames.NickNames);
+        Assert.Empty(_handler.NickNames.UserNames);
     }
 
     [Theory]
@@ -41,9 +41,9 @@ public class AcceptingConfigMessageHandlerTests
     {
         INetworkPayload[] responses = _handler.HandleMessage(new NetworkMessage(username, VALID_GRID)).ToArray();
         Assert.Equal(2, responses.Length);
-        Assert.Single(_handler.Manifest.NickNames);
-        Assert.Single(_handler.Manifest.UserNames);
-        Assert.Contains(username, _handler.Manifest.UserNames);
+        Assert.Single(_handler.NickNames.NickNames);
+        Assert.Single(_handler.NickNames.UserNames);
+        Assert.Contains(username, _handler.NickNames.UserNames);
         Assert.Contains(typeof(ConfigAcceptedMessage), responses.Select(r => r.GetType()));
         Assert.Contains(typeof(PlayerJoinedMessage), responses.Select(r => r.GetType()));
     }
@@ -59,9 +59,9 @@ public class AcceptingConfigMessageHandlerTests
             count++;
             INetworkPayload[] responses = _handler.HandleMessage(new NetworkMessage(username, VALID_GRID)).ToArray();
             Assert.Equal(2, responses.Length);
-            Assert.Equal(count, _handler.Manifest.NickNames.Count());
-            Assert.Equal(count, _handler.Manifest.UserNames.Count());
-            Assert.Contains(username, _handler.Manifest.UserNames);
+            Assert.Equal(count, _handler.NickNames.NickNames.Count());
+            Assert.Equal(count, _handler.NickNames.UserNames.Count());
+            Assert.Contains(username, _handler.NickNames.UserNames);
             Assert.Contains(typeof(ConfigAcceptedMessage), responses.Select(r => r.GetType()));
             Assert.Contains(typeof(PlayerJoinedMessage), responses.Select(r => r.GetType()));
         }
@@ -74,8 +74,8 @@ public class AcceptingConfigMessageHandlerTests
     {
         var responses = _handler.HandleMessage(new NetworkMessage(username, INVALID_GRID)).ToArray();
         Assert.Single(responses);
-        Assert.Empty(_handler.Manifest.NickNames);
-        Assert.Empty(_handler.Manifest.UserNames);
+        Assert.Empty(_handler.NickNames.NickNames);
+        Assert.Empty(_handler.NickNames.UserNames);
         Assert.Contains(typeof(InvalidConfigMessage), responses.Select(r => r.GetType()));
     }
 
@@ -87,9 +87,9 @@ public class AcceptingConfigMessageHandlerTests
         _handler.HandleMessage(new NetworkMessage(username, VALID_GRID));
         INetworkPayload[] responses = _handler.HandleMessage(new NetworkMessage(username, INVALID_GRID)).ToArray();
         Assert.Single(responses);
-        Assert.Single(_handler.Manifest.NickNames);
-        Assert.Single(_handler.Manifest.UserNames);
-        Assert.Contains(username, _handler.Manifest.UserNames);
+        Assert.Single(_handler.NickNames.NickNames);
+        Assert.Single(_handler.NickNames.UserNames);
+        Assert.Contains(username, _handler.NickNames.UserNames);
         Assert.Contains(typeof(InvalidConfigMessage), responses.Select(r => r.GetType()));
     }
 
