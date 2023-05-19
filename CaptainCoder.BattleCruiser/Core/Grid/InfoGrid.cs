@@ -1,16 +1,23 @@
 using CaptainCoder.Core;
 using System.Linq;
 namespace CaptainCoder.BattleCruiser;
+
+public interface IInfoGrid
+{
+    GridMark this[Position position] { get; }
+    public int Rows { get; }
+    public int Columns { get; }
+}
+
 /// <summary>
 /// An <see cref="InfoGrid"/> represents a grid containing information about
 /// positions that have been attacked.
 /// </summary>
-public class InfoGrid
+internal class InfoGrid : IInfoGrid
 {
     private readonly Dictionary<Position, GridMark> _marks = new();
-    public InfoGrid(int rows, int columns) => (Rows, Columns) = (rows, columns);
-    public int Rows { get; }
-    public int Columns { get; }
+    public int Rows { get; } = GridConfigValidator.ExpectedRows;
+    public int Columns { get; } = GridConfigValidator.ExpectedCols;
 
     public GridMark this[Position position]
     {
