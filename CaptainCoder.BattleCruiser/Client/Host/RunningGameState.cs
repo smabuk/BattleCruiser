@@ -1,17 +1,16 @@
 namespace CaptainCoder.BattleCruiser.Client;
 
-public class RunningGameState : IGameState
+public class GameRunningMessageHandler : IMessageHandler
 {
-    private readonly GameHostClient _host;
     private readonly Dictionary<string, GridConfig> _grids = new();
-    public RunningGameState(GameHostClient host) => _host = host;
+    // public GameRunningMessageHandler(NameManifest manifest, Dictionary<string, GridConfig>) => _host = host;
 
-    public void HandleMessage(NetworkMessage message)
+    public IEnumerable<INetworkPayload> HandleMessage(NetworkMessage message)
     {
        throw new NotImplementedException();
     }
 
-    public IGameState ProcessState()
+    public IMessageHandler ProcessState()
     {
         // TODO: Execute all moves 
         // Broadcast result to players

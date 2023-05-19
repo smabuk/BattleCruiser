@@ -1,6 +1,5 @@
 namespace CaptainCoder.BattleCruiser.Client;
-public interface IGameState
+public interface IMessageHandler
 {
-    public void HandleMessage(NetworkMessage message);
-    public IGameState ProcessState();
+    public IEnumerable<INetworkPayload> HandleMessage(NetworkMessage message);
 }

@@ -5,6 +5,7 @@ public static class GridConfigValidator
 {
     public static ValidationResult Validate(this GridConfig config)
     {
+        if (config.Ships.Length != 3) { return new MissingShipResult(); }
         HashSet<Position> occupied = new();
         HashSet<ShipType> types = new ();
         bool ValidPosition(Position p) =>
@@ -26,6 +27,8 @@ public abstract record ValidationResult(bool IsValid, string Message)
 {
     public static readonly ValidGrid Valid = new ();
 }
+public record MissingShipResult() : 
+    ValidationResult(false, $"Grid did not have exactly 3 ships.");
 public record DuplicateShipResult(ShipType Type) : 
     ValidationResult(false, $"Grid should contain 1 boat of each type but found multiple {Type}.");
 public record PositionOutOfBoundsResult(Position Position) : 
