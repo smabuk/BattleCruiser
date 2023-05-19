@@ -1,3 +1,3 @@
 namespace CaptainCoder.BattleCruiser;
 
-public record PlayerConfig(IEnumerable<Ship> Ships);
+public record PlayerConfig(Ship[] Ships);
