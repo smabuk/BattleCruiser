@@ -7,7 +7,6 @@ public interface IPlayerGrid
     public string NickName { get; }
     public bool IsAlive { get; }
     public IInfoGrid Grid { get; }
-    public PlayerConfig Config { get; }
     public AttackResult Attack(Position position);
 }
 
@@ -21,14 +20,12 @@ internal class PlayerGrid : IPlayerGrid
     public PlayerGrid(string nickName, PlayerConfig config)
     {
         NickName = nickName;
-        Config = config;
         _ships = config.Ships.Select(ship => new ShipHitInfo(ship)).ToArray();
     }
 
     public string NickName { get; }
     public bool IsAlive => _ships.Any(s => s.IsAlive);
     public IInfoGrid Grid => _grid;
-    public PlayerConfig Config { get; }
 
     public AttackResult Attack(Position position)
     {
