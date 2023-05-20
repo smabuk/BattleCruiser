@@ -1,4 +1,7 @@
+using CaptainCoder.BattleCruiser.Client;
+using System.Collections.ObjectModel;
 using CaptainCoder.Core;
+using System.Collections.Generic;
 using System.Linq;
 namespace CaptainCoder.BattleCruiser;
 
@@ -12,6 +15,19 @@ public interface IPlayerGrid
 
 public record AttackResult(IGridMark Mark);
 public record SunkResult(ShipType Ship) : AttackResult (IGridMark.Hit(Ship));
+
+public static class IPlayerGridExtensions
+{
+    public static IReadOnlyDictionary<string, IPlayerGrid> ToPlayerGrids(this IReadOnlyDictionary<string, PlayerConfig> configs)
+    {
+        Dictionary<string, IPlayerGrid> grids = new();
+        foreach ((string nickname, PlayerConfig config) in configs)
+        {
+            grids[nickname] = new PlayerGrid(nickname, config);
+        }
+        return new ReadOnlyDictionary<string, IPlayerGrid>(grids);
+    }
+}
 
 internal class PlayerGrid : IPlayerGrid
 {

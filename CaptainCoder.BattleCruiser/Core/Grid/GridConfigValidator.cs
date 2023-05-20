@@ -10,19 +10,21 @@ public static class GridConfigValidator
         if (config.Ships.Count() != 3) { return new MissingShipResult(); }
         HashSet<Position> occupied = new();
         HashSet<ShipType> types = new ();
-        bool ValidPosition(Position p) =>
-            p.Row >= 0 && p.Row < ExpectedRows && p.Col >= 0 && p.Col < ExpectedCols;
         foreach (Ship ship in config.Ships)
         {
             if (!types.Add(ship.ShipType)) { return new DuplicateShipResult(ship.ShipType); }
             foreach (Position position in ship.Positions())
             {
-                if (!ValidPosition(position)) { return new PositionOutOfBoundsResult(position); }
+                if (!position.Validate()) { return new PositionOutOfBoundsResult(position); }
                 if (!occupied.Add(position)) { return new OverlappingResult(position); }
             }
         }
         return ValidationResult.Valid;
     }
+
+    public static bool Validate(this Position toValidate) =>
+        toValidate.Row >= 0 && toValidate.Row < ExpectedRows && toValidate.Col >= 0 && toValidate.Col < ExpectedCols;
+    
 }
 
 public abstract record ValidationResult(bool IsValid, string Message)

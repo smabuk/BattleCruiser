@@ -12,8 +12,14 @@ public interface INameManifest
     /// true if a nickname was generated and false if the nickname was already found.
     /// </summary>
     public bool GetNickName(string username, out string nickname);
+    public bool TryGetNickName(string username, out string nickname);
+    public bool TrySetNickName(string userName, string nickName);
 }
 
+/// <summary>
+/// A <see cref="NameManifest"/> tracks username to nicknames as well as
+/// generates nicknames for new users.
+/// </summary>
 public class NameManifest : INameManifest
 {
     public static readonly NameGenerator NicknameGenerator;
@@ -48,17 +54,17 @@ public class NameManifest : INameManifest
         NicknameGenerator = new NameGenerator(adjective, color, animal);
     }
 
-    private readonly Dictionary<string, string> _userNametoNickName = new();
-    private readonly Dictionary<string, string> _nickNametoUserName = new();
+    private readonly Dictionary<string, string> _userNameToNickName = new();
+    private readonly Dictionary<string, string> _nickNameToUserName = new();
 
     /// <summary>
     /// Retrieves all UserNames that have been added to this manifest.
     /// </summary>
-    public IReadOnlyCollection<string> UserNames => _userNametoNickName.Keys;
+    public IReadOnlyCollection<string> UserNames => _userNameToNickName.Keys;
     /// <summary>
     /// Retrieves all NickNames that have been added to this manifest.
     /// </summary>
-    public IReadOnlyCollection<string> NickNames => _nickNametoUserName.Keys;
+    public IReadOnlyCollection<string> NickNames => _nickNameToUserName.Keys;
 
     /// <summary>
     /// Given a <paramref name="username"/> retrieves the users nickname. Returns
@@ -66,20 +72,53 @@ public class NameManifest : INameManifest
     /// </summary>
     public bool GetNickName(string username, out string nickname)
     {
-        if (_userNametoNickName.TryGetValue(username, out nickname))
+        if (_userNameToNickName.TryGetValue(username, out nickname))
         {
             return false;
         }
         do
         {
             nickname = NicknameGenerator.GenerateName();
-        } while (_nickNametoUserName.ContainsKey(nickname));
-        _userNametoNickName[username] = nickname;
-        _nickNametoUserName[nickname] = username;
+        } while (_nickNameToUserName.ContainsKey(nickname));
+        _userNameToNickName[username] = nickname;
+        _nickNameToUserName[nickname] = username;
         return true;
     }
 
-    public bool TryGetNickName(string username, [MaybeNullWhen(false)] out string nickname) => 
-        _userNametoNickName.TryGetValue(username, out nickname);
+    public bool TryGetNickName(string username, out string nickname) => 
+        _userNameToNickName.TryGetValue(username, out nickname);
 
+    public bool TrySetNickName(string userName, string nickName) 
+    {
+        if (_nickNameToUserName.ContainsKey(nickName)) { return false; }
+        _nickNameToUserName[nickName] = userName;
+        _userNameToNickName[userName] = nickName;
+        return true;
+    }
+}
+
+public static class NameManifestExtensions
+{
+    public static INameManifest ToManifest(this IEnumerable<(string userName, string nickName)> pairs)
+    {
+        NameManifest manifest = new();
+        foreach ((string username, string nickname) in pairs)
+        {
+            if(!manifest.TrySetNickName(username, nickname)) { throw new ArgumentException($"username, nickname pair must be unique. Discovered duplicate nickname {nickname}"); }
+        }
+        return manifest;
+    }
+
+    /// <summary>
+    /// Generates a manifest in which all usernames are also nicknames
+    /// </summary>
+    public static INameManifest ToManifest(this IEnumerable<string> usernames)
+    {
+        NameManifest manifest = new();
+        foreach (string username in usernames)
+        {
+            if(!manifest.TrySetNickName(username, username)) { throw new ArgumentException($"usernames must be unique. Discovered duplicate useranme {username}"); }
+        }
+        return manifest;   
+    }
 }

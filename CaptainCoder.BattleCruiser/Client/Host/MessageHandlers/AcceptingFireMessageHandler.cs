@@ -12,13 +12,13 @@ public sealed class AcceptingFireMessageHandler : IMessageHandler
     private readonly static INetworkPayload[] s_PlayerNotAlive = { new FireRejectedMessage("User board has been destroyed and may not make any moves.") };
     private readonly static INetworkPayload[] s_Accepted = { new FireAcceptedMessage() };
     private readonly Dictionary<string, Position> _playerTargets = new();
-    public AcceptingFireMessageHandler(IReadOnlyDictionary<string, IPlayerGrid> playerGrids, NameManifest nickNames)
+    public AcceptingFireMessageHandler(IReadOnlyDictionary<string, IPlayerGrid> playerGrids, INameManifest nickNames)
     {
         PlayerGrids = playerGrids;
         NickNames = nickNames;
         PlayerTargets = new ReadOnlyDictionary<string, Position>(_playerTargets);
     }
-    public NameManifest NickNames { get; }
+    public INameManifest NickNames { get; }
     public IReadOnlyDictionary<string, IPlayerGrid> PlayerGrids { get; }
     public IReadOnlyDictionary<string, Position> PlayerTargets { get; }
 
@@ -29,11 +29,11 @@ public sealed class AcceptingFireMessageHandler : IMessageHandler
         IPlayerGrid playerGrid = PlayerGrids[nickName];
         if (!playerGrid.IsAlive) { return s_PlayerNotAlive; }
         FireMessage fireMessage = (FireMessage)message.Payload;
-        if (PlayerGrids.TryGetValue(fireMessage.PlayerId, out IPlayerGrid targetGrid)) { return RejectResponse($"{fireMessage.PlayerId} is not a valid target."); }
+        if (!fireMessage.Target.Validate()) { return RejectResponse($"{fireMessage.Target} is out of bounds."); }
+        if (!PlayerGrids.TryGetValue(fireMessage.PlayerId, out IPlayerGrid targetGrid)) { return RejectResponse($"{fireMessage.PlayerId} is not a valid target."); }
         if (!targetGrid.IsAlive) { return RejectResponse($"{fireMessage.PlayerId} has already been destroyed."); }
-        bool isUnknownGridPosition = targetGrid.Grid.Marks.ContainsKey(fireMessage.Target);
-        if (!isUnknownGridPosition) { return RejectResponse($"{fireMessage.PlayerId} @ {fireMessage.Target} has already been fired upon."); }
-
+        bool isMarked = targetGrid.Grid.Marks.ContainsKey(fireMessage.Target);
+        if (isMarked) { return RejectResponse($"{fireMessage.PlayerId} @ {fireMessage.Target} has already been fired upon."); }
         _playerTargets[nickName] = fireMessage.Target;
         return s_Accepted;
     }
