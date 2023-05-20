@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace CaptainCoder.BattleCruiser.Client;
 
 public interface INameManifest
@@ -76,5 +78,8 @@ public class NameManifest : INameManifest
         _nickNametoUserName[nickname] = username;
         return true;
     }
+
+    public bool TryGetNickName(string username, [MaybeNullWhen(false)] out string nickname) => 
+        _userNametoNickName.TryGetValue(username, out nickname);
 
 }
