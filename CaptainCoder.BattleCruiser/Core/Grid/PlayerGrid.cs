@@ -49,7 +49,6 @@ internal class PlayerGrid : IPlayerGrid
 
     public AttackResult Attack(Position position)
     {
-        if (_grid.Marks.TryGetValue(position, out IGridMark mark)) { return new AttackResult(mark); }
         foreach (ShipHitInfo ship in _ships)
         {
             if (ship.HasPosition(position))
