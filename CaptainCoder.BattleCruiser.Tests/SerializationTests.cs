@@ -1,11 +1,23 @@
 using FsCheck.Xunit;
 using FsCheck;
+using Shouldly;
 using CaptainCoder.Core.Collections;
 
 namespace CaptainCoder.BattleCruiser.Tests;
 
 public class GridConfigTest
 {
+    [Fact]
+    public void TestSerializeDeserializeGameStartingAt()
+    {
+        DateTime time = DateTime.UtcNow;
+        GameStartingAt original = new (time);
+        byte[] serialized = NetworkSerializer.Serialize(original);
+        INetworkPayload deserialized = NetworkSerializer.Deserialize<INetworkPayload>(serialized);
+        deserialized.ShouldNotBeNull();
+        deserialized.ShouldBeOfType<GameStartingAt>();
+        deserialized.ShouldBe(original);
+    }
     [Fact]
     public void TestSerializeDeserializeGridConfigMessage()
     {

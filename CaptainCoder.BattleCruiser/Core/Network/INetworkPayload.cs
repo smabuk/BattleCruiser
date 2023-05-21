@@ -58,6 +58,7 @@ public record class FireResult(string PlayerId, Position Position, IGridMark Mar
 
 public record class GameResultMessage(int TotalRounds, string[] WinnerIds) : INetworkPayload;
 
+public record class GameStartingAt(DateTime Time) : INetworkPayload;
 
 // public record class 
 // MqttApplicationMessage -- This is what gets sent
