@@ -3,6 +3,8 @@ using System.Collections.ObjectModel;
 using CaptainCoder.Core;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
+
 namespace CaptainCoder.BattleCruiser;
 
 public interface IPlayerGrid
@@ -13,6 +15,8 @@ public interface IPlayerGrid
     public AttackResult Attack(Position position);
 }
 
+[JsonDerivedType(typeof(AttackResult), typeDiscriminator: "base")]
+[JsonDerivedType(typeof(SunkResult), typeDiscriminator: "sunk")]
 public record AttackResult(IGridMark Mark);
 public record SunkResult(ShipType Ship) : AttackResult (IGridMark.Hit(Ship));
 

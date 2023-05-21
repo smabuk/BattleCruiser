@@ -119,9 +119,9 @@ public class GridConfigTest
     {
         FireResult[] results = 
         {
-            new FireResult("Player1", (0, 0), IGridMark.Hit(ShipType.Battleship)),
-            new FireResult("Player2", (5, 5), IGridMark.Miss),
-            new FireResult("Player2", (3, 5), IGridMark.Hit(ShipType.Destroyer)),
+            new FireResult("Player1", (0, 0), new AttackResult(IGridMark.Hit(ShipType.Battleship)), new []{"Player2"}),
+            new FireResult("Player2", (5, 5), new AttackResult(IGridMark.Miss), new[]{"Player1"}),
+            new FireResult("Player2", (3, 5), new SunkResult(ShipType.Destroyer), new []{"Player4", "Player3"}),
         };
         // TODO: Explore Property generator for range of ints rather than any int
         RoundResultMessage payload = new (1, results);
@@ -130,17 +130,20 @@ public class GridConfigTest
         Assert.True(deserialized is RoundResultMessage);
         RoundResultMessage actual = (RoundResultMessage)deserialized;
         Assert.Equal(payload.RoundNumber, actual.RoundNumber);
-        Assert.True(payload.Results.SequenceEqual(actual.Results));
+        // Assert.True(payload.Results.SequenceEqual(actual.Results));
+        Assert.Equivalent(payload, actual);
     }
+
+    // private static bool CheckFireResultEquality(FireResult[] arr0, FireResult[] arr1)
 
     [Fact]
     public void TestSerializeDeserializeRoundResultMessage2()
     {
         FireResult[] results = 
         {
-            new FireResult("Stephen", (5, 5), IGridMark.Miss),
-            new FireResult("Player1", (0, 0), IGridMark.Miss),            
-            new FireResult("Player2", (3, 5), IGridMark.Hit(ShipType.Submarine)),
+            new FireResult("Stephen", (5, 5), new AttackResult(IGridMark.Miss), new []{"Player2"}),
+            new FireResult("Player1", (0, 0), new AttackResult(IGridMark.Miss), new []{"Player2", "Stephen"}),            
+            new FireResult("Player2", (3, 5), new AttackResult(IGridMark.Hit(ShipType.Submarine)), new []{"Player1"}),
         };
         // TODO: Explore Property generator for range of ints rather than any int
         RoundResultMessage payload = new (1, results);
@@ -149,7 +152,7 @@ public class GridConfigTest
         Assert.True(deserialized is RoundResultMessage);
         RoundResultMessage actual = (RoundResultMessage)deserialized;
         Assert.Equal(payload.RoundNumber, actual.RoundNumber);
-        Assert.True(payload.Results.SequenceEqual(actual.Results));
+        Assert.Equivalent(payload, actual);
     }
 
     [Fact]

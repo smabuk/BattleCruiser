@@ -54,7 +54,7 @@ public record class FireAcceptedMessage : IFireMessageResult;
 public record class FireRejectedMessage(string Message) : IFireMessageResult;
 
 public record class RoundResultMessage(int RoundNumber, FireResult[] Results) : INetworkPayload;
-public record class FireResult(string PlayerId, Position Position, IGridMark Mark);
+public record class FireResult(string TargetId, Position Position, AttackResult result, string[] AttackerIds);
 
 public record class GameResultMessage(int TotalRounds, string[] WinnerIds) : INetworkPayload;
 

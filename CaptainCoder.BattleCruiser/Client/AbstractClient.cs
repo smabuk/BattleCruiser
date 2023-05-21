@@ -179,7 +179,7 @@ public abstract class AbstractClient : IClient
         Log($"Success: {result.IsSuccess}");
     }
 
-    private void Log(string message)
+    protected void Log(string message)
     {
         if (!IsLogging) { return; }
         Logger.LogInformation(message);
