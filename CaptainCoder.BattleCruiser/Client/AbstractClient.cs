@@ -11,8 +11,9 @@ internal record OutboxMessage(INetworkPayload Message, string Topic);
 public abstract class AbstractClient : IClient
 {
     private bool _requestDisconnect = false;
-    private MqttFactory _mqttFactory = new();
-    private ConcurrentQueue<OutboxMessage> _outbox = new();
+    private readonly MqttFactory _mqttFactory = new();
+    private readonly ConcurrentQueue<OutboxMessage> _outbox = new();
+    private readonly ConcurrentQueue<NetworkMessage> _inbox = new();
 
     private ILogger? _logger;
     private ILogger Logger 
@@ -35,6 +36,7 @@ public abstract class AbstractClient : IClient
     public string Host { get; }
     public int Port { get; }
     public string UserName { get; }
+    public bool HasUnreadMessages => _inbox.Count > 0;
     
     public event Action? OnConnected;
     public event Action? OnDisconnected;
@@ -111,6 +113,9 @@ public abstract class AbstractClient : IClient
     }
 
     public void RequestDisconnect() => _requestDisconnect = true;
+    public bool TryDequeueInbox(out NetworkMessage message) => _inbox.TryDequeue(out message);
+    
+
     private async Task<IResult<OutboxMessage>> DequeueOutbox()
     {
         OutboxMessage? message = null;
@@ -137,6 +142,7 @@ public abstract class AbstractClient : IClient
             INetworkPayload networkPayload = NetworkSerializer.Deserialize<INetworkPayload>(payload);
             NetworkMessage networkMessage = new (username, networkPayload);
             Log($"Received Message: {networkMessage}");
+            _inbox.Enqueue(networkMessage);
             OnMessageReceived?.Invoke(networkMessage);
         });
     }
