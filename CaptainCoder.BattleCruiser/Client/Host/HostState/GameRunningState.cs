@@ -25,7 +25,7 @@ internal class GameRunningState : IHostState
     public IMessageHandler MessageHandler => _messageHandler;
     public int Duration { get; }
     public bool ShouldHalt => false;
-    public IEnumerable<INetworkPayload> Messages => _roundResult ??= new []{new RoundResultMessage(_roundNumber, GenerateFireResults(_messageHandler.PlayerGrids, _messageHandler.PlayerTargets))};
+    public IEnumerable<INetworkPayload> Messages => _roundResult ??= new []{new RoundResultMessage(_roundNumber, ApplyFireMessages(_messageHandler.PlayerGrids, _messageHandler.PlayerTargets))};
 
     public IHostState NextState()
     {
@@ -37,7 +37,7 @@ internal class GameRunningState : IHostState
         return new GameEndedState(_roundNumber, livingPlayers.Select(grid => grid.NickName).ToArray());
     }
 
-    public static FireResult[] GenerateFireResults(IReadOnlyDictionary<string, IPlayerGrid> PlayerGrids, IReadOnlyDictionary<string, FireMessage> PlayerTargets)
+    public static FireResult[] ApplyFireMessages(IReadOnlyDictionary<string, IPlayerGrid> PlayerGrids, IReadOnlyDictionary<string, FireMessage> PlayerTargets)
     {
         IEnumerable<IPlayerGrid> livingPlayers = PlayerGrids.Values.Where(grid => grid.IsAlive);
         IEnumerable<string> playersWhoFired = PlayerTargets.Keys;
@@ -75,13 +75,21 @@ internal class GameRunningState : IHostState
                 attackers = new();
                 result[message] = attackers;
             }
-            attackers.Append(attacker);
+            attackers.Add(attacker);
         }
         return result;
     }
 
     private static FireResult[] ProcessFireMessages(Dictionary<FireMessage, List<string>> messages, IReadOnlyDictionary<string, IPlayerGrid> grids)
     {
+        // We apply each attack twice.
+        // This allows us to determine on the second set of attacks if the hits
+        // happen to be Sunk results rather than hit results.
+        foreach ((FireMessage fireMessage, List<string> attackerIds) in messages)
+        {
+            grids[fireMessage.PlayerId].Attack(fireMessage.Target);
+        }
+
         FireResult[] results = new FireResult[messages.Count];
         int ix = 0;
         foreach ((FireMessage fireMessage, List<string> attackerIds) in messages)
